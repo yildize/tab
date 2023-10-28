@@ -4,7 +4,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from typing import List
 from utils.path import Path
 from utils.protocols import Doc
-from splitters.BaseLocalSplitter import LocalSplitter
+from splitters.base_local_splitter import LocalSplitter
 
 
 class PdfSplitter(LocalSplitter):
