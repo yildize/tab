@@ -19,11 +19,6 @@ class KnowledgeBase(ABC):
         self.__check_chunk_length()
         self.db = self._construct_storage()
 
-    def __load_docs(self, docs_path:str):
-        if not os.path.isabs(docs_path): docs_path = os.path.join(ROOT_PATH, docs_path)
-        with open(docs_path, 'rb') as file:
-             return pickle.load(file)
-
     def __check_chunk_length(self):
         for doc in self.docs:
             tokenized_length = len(self.embedder.client.tokenizer.tokenize(doc.page_content))

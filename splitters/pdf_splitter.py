@@ -11,7 +11,7 @@ class PdfSplitter(LocalSplitter):
 
     def __init__(self, local_src_path:List[str]|str|Path):
         super().__init__(local_src_path=local_src_path)
-        self.__text_splitter = RecursiveCharacterTextSplitter(chunk_size = 500, chunk_overlap  = 250, length_function = len)
+        self.__text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0, length_function = len)
 
     def _load_logic(self, abs_paths: List[str]) -> List[Doc]:
         """ Will load the source pdf paths as list of page docs"""

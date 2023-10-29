@@ -1,5 +1,5 @@
 import os
-
+import pickle
 
 def root_path():
     project_name = "tab"
@@ -12,6 +12,12 @@ def root_path():
     return current_dir
 
 ROOT_PATH = root_path()
+
+
+def load_docs(docs_path: str):
+    if not os.path.isabs(docs_path): docs_path = os.path.join(ROOT_PATH, docs_path)
+    with open(docs_path, 'rb') as file:
+        return pickle.load(file)
 
 
 
