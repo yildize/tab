@@ -7,11 +7,6 @@ class Doc(Protocol):
     metadata: Dict[str, Any]
 
 
-class Embedder(Protocol):
-    tokenizer: Any
-    max_seq_length: int
-    def encode(self, sentences:Union[str, List[str]]) -> Union[List[Tensor], ndarray, Tensor]:
-        ...
 
 class DB(Protocol):
     def similarity_search(self, sentences:Union[str, List[str]]) -> Union[List[Tensor], ndarray, Tensor]:
