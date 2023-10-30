@@ -16,6 +16,8 @@ from langchain.embeddings import HuggingFaceEmbeddings
 
 kb = DefaultKnowledgeBase(docs=splits, embedder_name="all-mpnet-base-v2")
 res = kb.search(q="kaleiçi")
+
+
 # for elm in res:
 #     print(elm.page_content)
 #     print(elm.metadata)

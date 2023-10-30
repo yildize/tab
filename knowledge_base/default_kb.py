@@ -1,5 +1,4 @@
 from knowledge_base.knowledge_base import CustomKnowledgeBase
-from sentence_transformers import SentenceTransformer
 from typing import Union, List
 from utils.protocols import Doc
 import faiss

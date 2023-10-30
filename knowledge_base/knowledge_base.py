@@ -1,19 +1,9 @@
-import pickle
+
 from abc import ABC, abstractmethod
-
-import numpy
-from langchain.embeddings import OpenAIEmbeddings
-from sentence_transformers import SentenceTransformer
-
 from knowledge_base.embedders import Embedder
-from langchain.vectorstores import Chroma
 from typing import Union, List
 from utils.protocols import Doc
-from utils.utils import ROOT_PATH, load_docs
-import os
-
-
-
+from utils.utils import load_docs
 
 class CustomKnowledgeBase(ABC):
 
