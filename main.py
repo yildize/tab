@@ -1,10 +1,15 @@
 from knowledge_base.default_kb import DefaultKnowledgeBase
 from knowledge_base.lc_kb import LangchainKnowledgeBase
+from qa_constructor.mistral_qa_constructor import MistralQAConstructor
 from splitters.pdf_splitter import PdfSplitter
 from utils.enums import LCVectorStores
 
-pdf_splitter = PdfSplitter(local_src_path="./storage/sources/antalya-guide.pdf")
-splits = pdf_splitter.split(save=False)
+qa_constructor = MistralQAConstructor()
+qa_constructor.create_qa_pairs()
+print(qa_constructor.qa_pairs)
+
+#pdf_splitter = PdfSplitter(local_src_path="./storage/sources/antalya-guide.pdf")
+#splits = pdf_splitter.split(save=False)
 
 from langchain.embeddings import HuggingFaceEmbeddings
 
@@ -14,8 +19,9 @@ from langchain.embeddings import HuggingFaceEmbeddings
 #res = kb.search(query="Where is the ucansu waterfall?", scores=True)
 
 
-kb = DefaultKnowledgeBase(docs=splits, embedder_name="all-mpnet-base-v2")
-res = kb.search(q="kaleiçi")
+#kb = DefaultKnowledgeBase(docs=splits, embedder_name="all-mpnet-base-v2")
+#res = kb.search(q="kaleiçi")
+
 
 
 # for elm in res:
@@ -23,7 +29,7 @@ res = kb.search(q="kaleiçi")
 #     print(elm.metadata)
 #     print("#######################")
 
-for elm in res:
-    print(elm.page_content)
-    print(elm.metadata)
-    print("---------------")
+#for elm in res:
+#    print(elm.page_content)
+#    print(elm.metadata)
+#    print("---------------")

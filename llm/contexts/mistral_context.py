@@ -15,7 +15,7 @@ class MistralContext:
 
     def update_last_message_content(self, entry:str):
         if not len(self.messages): raise IndexError("There is no message to update for the context")
-        self.messages[-1]["context"] = entry
+        self.messages[-1]["content"] = entry
 
     def __str__(self):
         return json.dumps(self.messages, indent=4)

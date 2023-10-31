@@ -14,7 +14,7 @@ class LocalSplitter(ABC):
     def __init__(self, local_src_path:List[str]|str|Path):
         self.local_src_path = local_src_path
 
-    def split(self, save=False) -> List[Doc]:
+    def split(self, save:bool=False, pages_only:bool=False,) -> List[Doc]:
         """
         Splits the documents at the given path into chunks.
 
@@ -27,7 +27,7 @@ class LocalSplitter(ABC):
 
         # Load the docs and split them with provided logics:
         docs = self._load_logic(abs_paths=self.local_src_path.path_list)
-        splits = self._split_logic(docs=docs)
+        splits = docs if pages_only else self._split_logic(docs=docs)
         if save: self.__save_splits(splits)
         return splits
 
