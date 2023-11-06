@@ -2,5 +2,4 @@
 __pycache__/
 *.pyc
 .idea/
-/storage/splits
-/storage/llms
+storage/
