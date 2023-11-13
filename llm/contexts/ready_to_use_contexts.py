@@ -24,6 +24,9 @@ class Contexts:
                                             "using only the provided content.")
         context.add_user_message(entry=f"...") # Great! Here is your context:\n{context}
         return context
+
+
+
     # def __mistral_q_derive(self) -> MistralContext:
     #     context = MistralContext()
     #     context.add_user_message(entry="I need you to help me on a subject. I will build a system to help users find quick answers to their questions "
