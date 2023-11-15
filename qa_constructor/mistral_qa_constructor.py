@@ -52,6 +52,7 @@ class MistralQAConstructor:
             print(f"Page {i+1}/{len(self.__page_docs)} is examined in {time.time()-self.t_check_point:.2f} seconds. {len(qs_str)} questions derived. Now we have in total of {len(self._questions)} questions derived.")
             print("#######################################################################")
             self.t_check_point = time.time()
+
     def __parse_questions(self, llm_answer):
         # This pattern matches strings that start with a number, followed by a period and a space, and end with a question mark
         pattern = re.compile(r'^(\d+)\.\s(.*\?)', re.MULTILINE)

@@ -5,11 +5,6 @@ from splitters.pdf_splitter import PdfSplitter
 
 app = Flask(__name__)
 
-
-
-
-
-
 pdf_splitter = PdfSplitter(local_src_path="./storage/sources")
 splits = pdf_splitter.split()
 kb = DefaultKnowledgeBase(docs=splits, embedder_name="all-mpnet-base-v2")

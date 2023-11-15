@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 from typing import Union, List
 
+import torch
 from langchain.embeddings import OpenAIEmbeddings
 from sentence_transformers import SentenceTransformer
 
@@ -70,7 +71,7 @@ class SetenceTransformerEmbedder(Embedder):
     def text_exceeds_max_seq_len(self, text:str) -> bool:
         return self.len_required_tokens(text=text) > self.max_seq_length
 
-    def __call__(self, sentences:str | List[str]) -> np.ndarray:
+    def __call__(self, sentences:str | List[str], to_numpy=True) -> Union[np.ndarray, torch.Tensor]:
         """ This is where the actual embedding operation happens. Shape will be (num_sentences, embedding_dim)"""
         if isinstance(sentences, str): sentences = [sentences]
-        return self.embedder.encode(sentences, convert_to_numpy=True)
+        return self.embedder.encode(sentences, convert_to_numpy=to_numpy)
