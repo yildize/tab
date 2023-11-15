@@ -17,7 +17,6 @@ class MistralLLM(LLM):
                       }[mistral_type]
         super().__init__(model_name=model_path)
 
-
     def ask(self, context: MistralContext) -> str:
         model_inputs = self.tokenizer.apply_chat_template(context.messages, return_tensors="pt").to(self._device)
         generated_ids = self.model.generate(model_inputs, max_new_tokens=2048).cpu()

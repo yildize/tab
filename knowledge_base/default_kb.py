@@ -9,7 +9,7 @@ class DefaultKnowledgeBase(CustomKnowledgeBase):
     db: faiss.IndexFlatIP
     embedder: SetenceTransformerEmbedder
 
-    def __init__(self, docs: Union[str, List[Doc]], embedder_name:str):
+    def __init__(self, docs: Union[str, List[Doc]], embedder_name:str) -> object:
         super().__init__(docs=docs, embedder=SetenceTransformerEmbedder(embedder_name=embedder_name))
 
     def _construct_storage(self):

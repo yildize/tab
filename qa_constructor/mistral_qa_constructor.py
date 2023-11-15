@@ -12,6 +12,7 @@ from utils.utils import Question, QAS, QAPair
 from datetime import datetime
 import time
 
+
 class MistralQAConstructor:
 
     class QAPair:
