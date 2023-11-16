@@ -29,12 +29,12 @@ class MetadataSchema(Schema):
     source = fields.Str()
     page = fields.Int()
     retrieval_info = fields.Nested(RetrievalInfoSchema())
+    answer = fields.Str()
 
 
 class DocSchema(Schema):
     page_content = fields.Str()
     metadata = fields.Nested(MetadataSchema())
-    #todo: maybe add answer here in case we store qapairs inside the kb.
 
 
 doc_schema = DocSchema()

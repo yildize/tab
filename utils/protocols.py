@@ -2,10 +2,10 @@ from typing import Any, Dict, Protocol, Union, List
 from torch import Tensor
 from numpy import ndarray
 
+
 class Doc(Protocol):
     page_content: str
     metadata: Dict[str, Any]
-
 
 
 class DB(Protocol):

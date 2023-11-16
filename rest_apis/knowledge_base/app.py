@@ -7,7 +7,7 @@ from rest_apis.knowledge_base.schemas import kb_query_schema, KBQuery, doc_schem
 from knowledge_base.default_kb import DefaultKnowledgeBase
 from splitters.pdf_splitter import PdfSplitter
 from rest_apis.knowledge_base.arg_parser import parser
-
+from utils.utils import load_qa_pairs, load_docs
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -34,11 +34,16 @@ def handle_validation_error(err):
 if __name__ == '__main__':
     # To run from terminal, position to the project root and then: python -m rest_apis.knowledge_base.app -- args
     args = parser.parse_args()
-    # todo: We might want to load a List[Doc] from local in that case use source path to load it and skip splitting.
-    # todo: For the QAPair the answer might need to be stored inside the metadata to keep the structure as it is. Or maybe not, please further examine.
-    pdf_splitter = PdfSplitter(local_src_path=args.source_path_to_split, chunk_size=args.chunk_size, chunk_overlap=args.chunk_overlap)
-    splits = pdf_splitter.split()
-    kb = DefaultKnowledgeBase(docs=splits, embedder_name=args.embedder_name) # use lock for thread safety
+
+    if args.source_type == 'pdfs':
+        pdf_splitter = PdfSplitter(local_src_path=args.source_path, chunk_size=args.chunk_size, chunk_overlap=args.chunk_overlap)
+        docs = pdf_splitter.split()
+    elif args.source_type == 'qa_docs':  # this should work for qa_json as well
+        docs = load_qa_pairs(qa_pairs_path=args.source_path)
+    else:  # "docs"
+        docs = load_docs(docs_path=args.source_path)
+
+    kb = DefaultKnowledgeBase(docs=docs, embedder_name=args.embedder_name) # use lock for thread safety
 
     if args.serve_style == "waitress":
         from waitress import serve

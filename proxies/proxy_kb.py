@@ -2,17 +2,11 @@ import json
 
 import requests
 from typing import List
-
-from dataclasses import dataclass
 from utils.protocols import Doc
+from utils.utils import DummyDoc
 
 
 class ProxyKnowledgeBase:
-
-    @dataclass
-    class DummyDoc:
-        page_content:str
-        metadata: dict
 
     """ Proxy KB class to handle the knowledge base server."""
     def __init__(self, endpoint_url:str):
@@ -21,7 +15,7 @@ class ProxyKnowledgeBase:
     def search(self, q, k=3) -> List[Doc]:
         response = requests.post(self.endpoint_url, json={"content":q, "k":k})
         doc_dicts = json.loads(response.text)["docs"]
-        docs = [self.DummyDoc(page_content=doc_dict["page_content"], metadata=doc_dict["metadata"]) for doc_dict in doc_dicts]
+        docs = [DummyDoc(page_content=doc_dict["page_content"], metadata=doc_dict["metadata"]) for doc_dict in doc_dicts]
         return docs
 
 

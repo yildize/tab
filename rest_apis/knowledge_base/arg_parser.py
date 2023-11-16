@@ -5,7 +5,8 @@ import argparse
 parser = argparse.ArgumentParser(description='Run the Knowledge Base API server.')
 
 # Split arguments
-parser.add_argument('--source_path_to_split', type=str, default="./storage/sources", help='Path to the source files to split')
+parser.add_argument('--source_type', type=str, default='pdfs', choices=['pdfs', 'docs', 'qa_docs'], help='Type of source you want load')
+parser.add_argument('--source_path', type=str, default="./storage/sources", help='Path to the source files to split')
 parser.add_argument('--chunk_size', type=int, default=1000, help='Size of each chunk')
 parser.add_argument('--chunk_overlap', type=int, default=0, help='Overlap between chunks')
 
