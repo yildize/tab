@@ -34,6 +34,8 @@ def handle_validation_error(err):
 if __name__ == '__main__':
     # To run from terminal, position to the project root and then: python -m rest_apis.knowledge_base.app -- args
     args = parser.parse_args()
+    # todo: We might want to load a List[Doc] from local in that case use source path to load it and skip splitting.
+    # todo: For the QAPair the answer might need to be stored inside the metadata to keep the structure as it is. Or maybe not, please further examine.
     pdf_splitter = PdfSplitter(local_src_path=args.source_path_to_split, chunk_size=args.chunk_size, chunk_overlap=args.chunk_overlap)
     splits = pdf_splitter.split()
     kb = DefaultKnowledgeBase(docs=splits, embedder_name=args.embedder_name) # use lock for thread safety
