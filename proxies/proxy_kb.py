@@ -21,7 +21,7 @@ class ProxyKnowledgeBase:
     def search(self, q, k=3) -> List[Doc]:
         response = requests.post(self.endpoint_url, json={"content":q, "k":k})
         doc_dicts = json.loads(response.text)["docs"]
-        docs = [ProxyKnowledgeBase.DummyDoc(page_content=doc_dict["page_content"], metadata=doc_dict["metadata"]) for doc_dict in doc_dicts]
+        docs = [self.DummyDoc(page_content=doc_dict["page_content"], metadata=doc_dict["metadata"]) for doc_dict in doc_dicts]
         return docs
 
 
