@@ -22,7 +22,7 @@ def index():
 def search():
     query = KBQuery(**kb_query_schema.load(request.get_json()))
     docs = kb.search(q=query.content, k=query.k) if query.k else kb.search(q=query.content)
-    docs_dumped = [doc_schema.dumps(doc) for doc in docs]
+    docs_dumped = [doc_schema.dump(doc) for doc in docs]
     return jsonify({"docs": docs_dumped})
 
 

@@ -28,5 +28,5 @@ class DefaultKnowledgeBase(CustomKnowledgeBase):
             # Deep copy to provide thread safety for multi-threadded usages.
             similar_doc = self.docs[index].copy(deep=True) # use copy.deepcopy(self.docs[index]) if it throws an error.
             similar_doc.metadata["retrieval_info"] = {"q": q, "dist": dist, "token_len": self.embedder.len_required_tokens(similar_doc.page_content)}
-            res_docs.append(self.docs[index])
+            res_docs.append(similar_doc)
         return res_docs
