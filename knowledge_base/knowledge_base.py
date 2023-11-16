@@ -5,6 +5,7 @@ from typing import Union, List
 from utils.protocols import Doc
 from utils.utils import load_docs
 
+
 class CustomKnowledgeBase(ABC):
 
     def __init__(self, docs:Union[str, List[Doc]], embedder:Embedder):

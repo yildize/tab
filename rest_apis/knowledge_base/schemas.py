@@ -34,6 +34,7 @@ class MetadataSchema(Schema):
 class DocSchema(Schema):
     page_content = fields.Str()
     metadata = fields.Nested(MetadataSchema())
+    #todo: maybe add answer here in case we store qapairs inside the kb.
 
 
 doc_schema = DocSchema()
