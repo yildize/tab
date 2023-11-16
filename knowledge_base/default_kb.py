@@ -9,7 +9,7 @@ class DefaultKnowledgeBase(CustomKnowledgeBase):
     db: faiss.IndexFlatIP
     embedder: SetenceTransformerEmbedder
 
-    def __init__(self, docs: Union[str, List[Doc]], embedder_name:str) -> object:
+    def __init__(self, docs: Union[str, List[Doc]], embedder_name:str):
         super().__init__(docs=docs, embedder=SetenceTransformerEmbedder(embedder_name=embedder_name))
 
     def _construct_storage(self):
@@ -25,7 +25,8 @@ class DefaultKnowledgeBase(CustomKnowledgeBase):
         distances, indices = self.db.search(x=query_embedding, k=k)
         res_docs = []
         for index, dist in zip(indices[0], distances[0]):
-            similar_doc = self.docs[index]
-            similar_doc.metadata["retrieval_info"] = {"q":q, "dist":dist, "token_len": self.embedder.len_required_tokens(similar_doc.page_content)}
+            # Deep copy to provide thread safety for multi-threadded usages.
+            similar_doc = self.docs[index].copy(deep=True) # use copy.deepcopy(self.docs[index]) if it throws an error.
+            similar_doc.metadata["retrieval_info"] = {"q": q, "dist": dist, "token_len": self.embedder.len_required_tokens(similar_doc.page_content)}
             res_docs.append(self.docs[index])
         return res_docs
