@@ -29,7 +29,7 @@ class DefaultRetrievalAugmentedGenerator:
             retrieved_content += f"Source{i}:{os.path.basename(source)}\nContent{i}:{content}\n\n-----------\n" # f"Content{i}:{content}\n-----------\n" #
 
         context = MistralContext()
-        context.add_user_message(entry=f"Please answer the following user question utilizing the content(s) provided below and specify names of source pdfs that you have used for the answer. If the content(s) is not sufficient to answer this question, please "
+        context.add_user_message(entry=f"Please answer ONLY the following user question utilizing the content(s) provided below and specify names of source pdfs that you have used for the answer. If the content(s) is not sufficient to answer this question, please "
                                        f"ONLY answer, 'Sorry, I could not find the answer in my knowledge base.'\n\nHere is the question:{question}\n\nHere is the content(s):\n{retrieved_content}.")
         return context
 
