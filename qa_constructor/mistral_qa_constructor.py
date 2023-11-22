@@ -22,7 +22,7 @@ class MistralQAConstructor:
     def __init__(self):
         self.pdf_splitter = PdfSplitter(local_src_path="./storage/sources/tsps")
         self.__splits = self.pdf_splitter.split()
-        self.__page_docs = self.pdf_splitter.split(pages_only=True)
+        self.__page_docs = self.pdf_splitter.split(load_only=True)
 
         self.llm = MistralLLM(mistral_type=MistralTypes.GPTQ_4bit)
         #self.kb = DefaultKnowledgeBase(docs=self.__splits, embedder_name="all-mpnet-base-v2")

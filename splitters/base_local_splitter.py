@@ -2,7 +2,7 @@ import datetime
 import os
 import pickle
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Union
 
 from utils.path import Path
 from utils.protocols import Doc
@@ -11,25 +11,25 @@ from utils.utils import ROOT_PATH
 
 class LocalSplitter(ABC):
 
-    def __init__(self, local_src_path:List[str]|str|Path):
+    def __init__(self, local_src_path:Union[List[str], str, Path]):
         self.local_src_path = local_src_path
+        # Convert a local path into a Path for utilities
+        if not isinstance(self.local_src_path, Path): self.local_src_path = Path(self.local_src_path)
 
-    def split(self, save:bool=False, pages_only:bool=False,) -> List[Doc]:
+    def split(self, save:bool=False, load_only:bool=False, both_load_and_split:bool=False) -> Union[List[Doc]]:
         """
         Splits the documents at the given path into chunks.
 
         :param local_src_path: Path to the local documents to load and split.
         :return: List of docs each representing a chunk
         """
-
-        # Convert a local path into a Path for utilities
-        if not isinstance(self.local_src_path, Path): self.local_src_path = Path(self.local_src_path)
-
         # Load the docs and split them with provided logics:
         docs = self._load_logic(abs_paths=self.local_src_path.path_list)
-        splits = docs if pages_only else self._split_logic(docs=docs)
-        if save: self.__save_splits(splits)
-        return splits
+        if load_only: doc_list = docs
+        elif both_load_and_split: doc_list = (docs, self._split_logic(docs=docs))
+        else: doc_list = self._split_logic(docs=docs)
+        if save: self.__save_splits(doc_list)
+        return doc_list
 
 
     @abstractmethod
