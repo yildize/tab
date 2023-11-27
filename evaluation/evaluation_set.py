@@ -67,3 +67,11 @@ Elective CMP6XX
 Elective CMP6XX
 CMP601"""))
 
+    @property
+    def answers(self):
+        return [qa.a for qa in self.qas]
+
+    @property
+    def questions(self):
+        return [qa.q for qa in self.qas]
+
