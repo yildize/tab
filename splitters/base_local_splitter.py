@@ -2,7 +2,7 @@ import datetime
 import os
 import pickle
 from abc import ABC, abstractmethod
-from typing import List, Union
+from typing import List, Union, Optional
 
 from utils.path import Path
 from utils.protocols import Doc
@@ -16,7 +16,7 @@ class LocalSplitter(ABC):
         # Convert a local path into a Path for utilities
         if not isinstance(self.local_src_path, Path): self.local_src_path = Path(self.local_src_path)
 
-    def split(self, save:bool=False, load_only:bool=False, both_load_and_split:bool=False) -> Union[List[Doc]]:
+    def split(self, docs:Optional[List[Doc]]=None, save:bool=False, load_only:bool=False, both_load_and_split:bool=False, add_doc_index=False) -> Union[List[Doc]]:
         """
         Splits the documents at the given path into chunks.
 
@@ -24,7 +24,7 @@ class LocalSplitter(ABC):
         :return: List of docs each representing a chunk
         """
         # Load the docs and split them with provided logics:
-        docs = self._load_logic(abs_paths=self.local_src_path.path_list)
+        docs = self._load_logic(abs_paths=self.local_src_path.path_list, add_doc_index=add_doc_index) if docs is None else docs
         if load_only: doc_list = docs
         elif both_load_and_split: doc_list = (docs, self._split_logic(docs=docs))
         else: doc_list = self._split_logic(docs=docs)
@@ -33,7 +33,7 @@ class LocalSplitter(ABC):
 
 
     @abstractmethod
-    def _load_logic(self, abs_paths: List[str]) -> List[Doc]:
+    def _load_logic(self, abs_paths: List[str], add_doc_index=False) -> List[Doc]:
         """ Will load the provided list of paths into List of Docs. A return Doc can be a page or the whole source."""
         ...
 

@@ -25,8 +25,6 @@ class Contexts:
         context.add_user_message(entry=f"...") # Great! Here is your context:\n{context}
         return context
 
-
-
     # def __mistral_q_derive(self) -> MistralContext:
     #     context = MistralContext()
     #     context.add_user_message(entry="I need you to help me on a subject. I will build a system to help users find quick answers to their questions "
@@ -61,5 +59,6 @@ class Contexts:
         context.add_assistant_message(entry="""I have read your instruction very carefully, and I totally understood what to do. Now give me the page content.""")
         context.add_user_message(entry=f"...") # Great! Here is your context:\n{context}
         return context
+
 
 ready_ctxs = Contexts()
