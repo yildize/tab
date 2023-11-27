@@ -1,6 +1,6 @@
 import os
 import pickle
-from typing import Dict, Any
+from typing import Dict, Any, Union
 import json
 from utils.protocols import Doc
 from dataclasses import dataclass
@@ -57,7 +57,7 @@ class Question:
 
 
 class QAPair:
-    def __init__(self, q: str, a: str, m: dict[str, Any]):
+    def __init__(self, q: str, a: str, m: Union[dict[str, Any], List[dict[str, Any]]]):
         self.question, self.answer, self.metadata = q, a, m
 
     # This method will convert the object to a dictionary which can be serialized
