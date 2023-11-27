@@ -89,6 +89,7 @@ class MistralQAConstructor:
             self.qa_pairs.add_pair(QAPair(q=q_str, a=a_str, m=metadata))
             print(f"{i+1}/{len(self._questions)} is answered it took {(time.time()-self.t_check_point):.2f} seconds.")
             self.t_check_point = time.time()
+
     def __parse_answer(self, llm_answer):
         return llm_answer
 
