@@ -43,7 +43,7 @@ Ardan YILMAZ"""
         ))
 
         self.qas.append(EvaluationSet.QAPair(
-            q="""What is the content of  CMP730	Pattern Classification Methods course?""",
+            q="""What is the content of CMP730 Pattern Classification Methods course?""",
             a="""The content of the CMP730 Pattern Classification Methods course is as follows:
 
 The course covers general definitions and mathematical foundations of Bayes Decision Theory, Maximum Likelihood, Nearest Neighbor Classification, Linear Discrimination Functions, Multilayer Neural Networks, Unsupervised Learning and Clustering. It is a theoretical course with a focus on the underlying methods and principles used for pattern classification in the field of machine learning and data analysis."""

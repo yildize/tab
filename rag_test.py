@@ -2,7 +2,7 @@ from rag.rag import DefaultRetrievalAugmentedGenerator
 from splitters.pdf_splitter import PdfSplitter
 import time
 
-pdf_splitter = PdfSplitter(chunk_size=750, chunk_overlap=0, local_src_path="./storage/sources/uni")
+pdf_splitter = PdfSplitter(chunk_size=1000, chunk_overlap=0, local_src_path="./storage/sources/uni")
 splits = pdf_splitter.split()
 
 test_rag = DefaultRetrievalAugmentedGenerator(docs=splits)
@@ -32,8 +32,8 @@ for qa in evaluation_set.qas:
 be = BleuEvaluator()
 se = SemanticEvaluator()
 
-print("Bleu Scores:", be.evaluate(ground_truth_answers=evaluation_set.answers, system_answers=answers))
-print("Semantics Scores:", se.evaluate(ground_truth_answers=evaluation_set.answers, system_answers=answers))
+print("Bleu Score:", be.evaluate(ground_truth_answers=evaluation_set.answers, system_answers=answers))
+print("Semantics Score:", se.evaluate(ground_truth_answers=evaluation_set.answers, system_answers=answers))
 print("Average Answering Time:", sum(answer_times)/len(answer_times))
 
 # while True:

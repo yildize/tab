@@ -31,6 +31,6 @@ class BleuEvaluator(BaseEvaluator):
             score = sentence_bleu(truth_tokens, system_tokens, smoothing_function=self.smoothing_func.method1)
             scores.append(score)
 
-        return scores
+        return scores, sum(scores)/len(scores)
 
 

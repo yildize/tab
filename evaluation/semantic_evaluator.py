@@ -24,7 +24,7 @@ class SemanticEvaluator(BaseEvaluator):
         scores = torch.diag(full_cosine_scores) #todo:  Handling negative similarities, although it is rare.
         # Although it is rare for sentence-embedders to have negative similarities, I will be clamping the results just to be safe
         clamped_scores = torch.clamp(scores, min=0, max=1)
-        return clamped_scores.mean().item()
+        return clamped_scores, clamped_scores.mean().item()
 
     def _check_for_long_sentences(self):
         num_pairs = len(self.ground_truth_answers )

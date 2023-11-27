@@ -25,7 +25,7 @@ class MistralLLM(LLM):
 
     def ask(self, context: MistralContext) -> str:
         model_inputs = self.tokenizer.apply_chat_template(context.messages, return_tensors="pt").to(self._device)
-        generated_ids = self.model.generate(model_inputs, max_new_tokens=2048).cpu()
+        generated_ids = self.model.generate(model_inputs, max_new_tokens=2048, do_sample=False).cpu()
         decoded = self.tokenizer.batch_decode(generated_ids)
         return self.__get_last_response(decoded[0])
 
