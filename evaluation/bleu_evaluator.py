@@ -1,8 +1,9 @@
 import nltk
-from nltk.translate.bleu_score import sentence_bleu
+from nltk.translate.bleu_score import sentence_bleu, corpus_bleu
 from nltk.translate.bleu_score import SmoothingFunction
 from evaluation.base_evaluator import BaseEvaluator
 from sentence_transformers import util
+from nltk.tokenize import word_tokenize
 
 from knowledge_base.embedders import SetenceTransformerEmbedder
 
@@ -17,7 +18,8 @@ class BleuEvaluator(BaseEvaluator):
 
 
     def _evaluation_logic(self) -> float:
-        """ This method will compare the ground truth answers with the system answers and return and evaluation score"""
+        """ This method will compare the ground truth answers with the system answers and return and evaluation score.
+        Formula: BP*exp(sum(w*log(p))) without smoothining."""
         scores = []
         # Calculate and print BLEU scores for each answer
         for system, truth in zip(self.system_answers, self.ground_truth_answers):

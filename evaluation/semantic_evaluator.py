@@ -33,5 +33,3 @@ class SemanticEvaluator(BaseEvaluator):
                 # long_sentence_descriptor = f"Index {i} of Sentence of Ground Truths" if i < num_pairs else f"Index {i-num_pairs} of Sentence of System Answers"
                 # #warnings.warn(f"{long_sentence_descriptor} is too long ({self.embedder.len_required_tokens(sentence)} tokens needed) "
                 # #              f"to embed  with this embedder model (max {self.embedder.max_seq_length} tokens)")
-
-
