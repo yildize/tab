@@ -7,6 +7,7 @@ from knowledge_base.default_kb import DefaultKnowledgeBase
 from llm.contexts.mistral_context import MistralContext
 from llm.contexts.ready_to_use_contexts import ready_ctxs
 from llm.mistral_llm import MistralLLM
+from proxies.proxy_mistral_llm import ProxyMistralLLM
 from splitters.pdf_splitter import PdfSplitter
 import re
 
@@ -26,12 +27,14 @@ class MistralQAConstructorAdvanced:
             self.q, self.a, self.metadata = q, a, metadata
 
     def __init__(self, derived_questions_path: str = None):
-        # Obtain the pages with index and summary:
-        self.pdf_splitter = PdfSplitter(local_src_path="./storage/sources/tsps", chunk_size=1000, chunk_overlap=0)
-        self.__page_docs = self.pdf_splitter.split(load_only=True, add_doc_index=True)
-
         # Prepare the llm
-        self.llm = MistralLLM(mistral_type=MistralTypes.GPTQ_4bit)
+        #self.llm = MistralLLM(mistral_type=MistralTypes.GPTQ_4bit)
+        self.llm = ProxyMistralLLM(endpoint_url="http://d4b1-34-16-129-117.ngrok-free.app/ask")
+
+        # Obtain the pages with index and summary:
+        self.pdf_splitter = PdfSplitter(local_src_path="./storage/sources/uni/graduate_faculty_members.pdf", chunk_size=1000, chunk_overlap=0)
+        self.__page_docs = self.pdf_splitter.split(load_only=True, add_doc_index=True)
+        #self.__reformat_page_contents()
 
         # Prepare the storage items
         self._questions: List[str] = [] if derived_questions_path is None else self.__load_questions(path=derived_questions_path)
@@ -50,11 +53,10 @@ class MistralQAConstructorAdvanced:
         ctx.add_user_message(entry="...")
         for i,page_doc in enumerate(self.__page_docs):
             # update ctx with page_doc.content
-            ctx.update_last_message_content(entry=f"Based on the following page summary and content, please generate a comprehensive list of useful/practical "
-                                                  f"questions. These questions should mimic those that might be asked by a student or teacher unfamiliar "
-                                                  f"with the document, focusing on practical and significant aspects.\n\n"
-                                                  f"Here is the page summary: [{page_doc.metadata['page_summary']}]\n\n"
-                                                  f"Here is the page content: [{page_doc.page_content}]")
+            ctx.update_last_message_content(entry=f"""Based on the following page content, please generate a comprehensive list of useful/practical questions. These questions should mimic those that might be asked by a student or teacher unfamiliar with the document, focusing on practical and significant aspects.
+
+Here is the page content: [{page_doc.page_content}]
+""")
             # ask for question derivation to llm
             llm_answer = self.llm.ask(context=ctx)
             # parse answer and obtain questions
@@ -102,12 +104,11 @@ class MistralQAConstructorAdvanced:
     def __configure_kb(self):
         if self.__kb_configured: return
         self.__add_summary_to_pages()
-
         # Now obtain different chunk_sized splits to increase accuracy:
         splits1= self.pdf_splitter.split(docs=self.__page_docs)
-        splits2 = PdfSplitter(local_src_path="./storage/sources/tsps", chunk_size=500, chunk_overlap=100).split(docs=self.__page_docs)
-        splits3 = PdfSplitter(local_src_path="./storage/sources/tsps", chunk_size=250, chunk_overlap=100).split(docs=self.__page_docs)
-        splits4 = PdfSplitter(local_src_path="./storage/sources/tsps", chunk_size=250, chunk_overlap=100).split(docs=self.__page_docs)
+        splits2 = PdfSplitter(local_src_path="./storage/sources/uni/graduate_faculty_members.pdf", chunk_size=500, chunk_overlap=100).split(docs=self.__page_docs)
+        splits3 = PdfSplitter(local_src_path="./storage/sources/uni/graduate_faculty_members.pdf", chunk_size=250, chunk_overlap=100).split(docs=self.__page_docs)
+        splits4 = PdfSplitter(local_src_path="./storage/sources/uni/graduate_faculty_members.pdf", chunk_size=250, chunk_overlap=100).split(docs=self.__page_docs)
 
         # Finally obtain a List[Doc] consisting of page_summaries:
         summary_docs = self.__obtain_summary_docs()
@@ -139,6 +140,15 @@ class MistralQAConstructorAdvanced:
         related_page_docs = [self.__page_docs[doc_index] for doc_index in docs_indexes]
         return related_page_docs
 
+    # def __reformat_page_contents(self) -> None:
+    #     for page in self.__page_docs:
+    #         ctx = MistralContext()
+    #         ctx.add_user_message(entry=f"Please rewrite the following page content in a more formatted way. Keep the content as it is just "
+    #                                    f"reformat it.\n\nHere is the content:\n[{page.page_content}]")
+    #         new_page_content = self.llm.ask(context=ctx)
+    #         # Replace page_content with the page_summary:
+    #         page.page_content = new_page_content
+
     def __add_summary_to_pages(self) -> None:
         """ This method adds a summary for each page, later will be used for indexing."""
         previous_page_summary = "No summary found."
@@ -153,6 +163,7 @@ class MistralQAConstructorAdvanced:
             page_summary = self.llm.ask(context=ctx)
             page_doc.metadata["page_summary"] = page_summary
             previous_page_summary = page_summary
+
 
     def __obtain_summary_docs(self) -> List[Doc]:
         summary_docs = []

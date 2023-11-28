@@ -13,15 +13,16 @@ class PdfSplitter(LocalSplitter):
         super().__init__(local_src_path=local_src_path)
         self.__text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap, length_function = len)
 
-    def _load_logic(self, abs_paths: List[str]) -> List[Doc]:
+    def _load_logic(self, abs_paths: List[str], add_doc_index=False) -> List[Doc]:
         """ Will load the source pdf paths as list of page docs"""
         docs = []
         doc_index = 0
         for path in abs_paths:
             page_docs = PyPDFLoader(path).load()
-            for page_doc in page_docs:
-                page_doc.metadata["doc_index"] = doc_index
-                doc_index += 1
+            if add_doc_index:
+                for page_doc in page_docs:
+                    page_doc.metadata["doc_index"] = doc_index
+                    doc_index += 1
             docs.extend(page_docs)
         return docs  # will contain all source's all pages. Each page as a doc.
 
