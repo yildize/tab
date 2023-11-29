@@ -50,6 +50,8 @@ class MistralQAConstructorAdvanced:
         # Just for debugging
         self.t_check_point = time.time()
 
+
+
     def create_questions(self, save=True):
         # ready question derivation context
         ctx = MistralContext()
@@ -73,6 +75,7 @@ class MistralQAConstructorAdvanced:
             print(f"Page {i+1}/{len(self.__page_docs)} is examined in {time.time()-self.t_check_point:.2f} seconds. {len(qs_str)} questions derived. Now we have in total of {len(self._questions)} questions derived.")
             print("#######################################################################")
             self.t_check_point = time.time()
+
         if save: self.__save_questions()
         self.__questions_ready = True
 
