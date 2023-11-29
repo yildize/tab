@@ -26,15 +26,17 @@ class MistralQAConstructorAdvanced:
         def __init__(self, q, a, metadata):
             self.q, self.a, self.metadata = q, a, metadata
 
-    def __init__(self, derived_questions_path: str = None):
+    def __init__(self, derived_questions_path: str = None, proxy_llm_url:str = None):
         # Prepare the llm
         #self.llm = MistralLLM(mistral_type=MistralTypes.GPTQ_4bit)
-        self.llm = ProxyMistralLLM(endpoint_url="http://d4b1-34-16-129-117.ngrok-free.app/ask")
+        self.llm = ProxyMistralLLM(endpoint_url=proxy_llm_url)
 
         # Obtain the pages with index and summary:
         self.pdf_splitter = PdfSplitter(local_src_path="./storage/sources/uni/graduate_faculty_members.pdf", chunk_size=1000, chunk_overlap=0)
         self.__page_docs = self.pdf_splitter.split(load_only=True, add_doc_index=True)
         #self.__reformat_page_contents()
+
+        self.__add_summary_to_pages()
 
         # Prepare the storage items
         self._questions: List[str] = [] if derived_questions_path is None else self.__load_questions(path=derived_questions_path)
@@ -53,14 +55,36 @@ class MistralQAConstructorAdvanced:
         ctx.add_user_message(entry="...")
         for i,page_doc in enumerate(self.__page_docs):
             # update ctx with page_doc.content
-            ctx.update_last_message_content(entry=f"""Based on the following page content, please generate a comprehensive list of useful/practical questions. These questions should mimic those that might be asked by a student or teacher unfamiliar with the document, focusing on practical and significant aspects.
+            ctx.update_last_message_content(entry=f"Based on the following page content, please generate a comprehensive list of useful/practical questions. "
+                                                  f"These questions should mimic those that might be asked by a student or teacher who is not AWARE of the document, focusing on practical and significant aspects. "
+                                                  f"You CAN NOT ask questions like 'What is ... in this document?' Derive questions as if you don't know the existence of the documents, just focus to the content.\n\n"
+                                                  f"Here is the page summary: [{page_doc.metadata['page_summary']}]\n\n"
+                                                  f"Here is the page content: [{page_doc.page_content}]\n\n"
+                                                  f"If the page content already contains derived questions, use them as is.")
 
-Here is the page content: [{page_doc.page_content}]
-""")
+
             # ask for question derivation to llm
             llm_answer = self.llm.ask(context=ctx)
             # parse answer and obtain questions
-            qs_str = self.__parse_questions(llm_answer)
+            qs_str = self.__parse_questions(llm_answer.strip())
+
+            # For the current page derive extra questions on sub-chunks:
+            for chunk in self.__sub_pages(page_doc=page_doc):
+                # update ctx with page_doc.content
+                ctx.update_last_message_content(entry=f"I will provide you with a sub-page content and a short summary of what was the page that the sub-page is derived from was about."
+                                                      f"Based on ONLY the following sub-page content, please generate a list of useful/practical questions. "
+                                                      f"These questions should mimic those that might be asked by a student or teacher unfamiliar with the document, focusing on practical and significant aspects."
+                                                      f"You CAN NOT ask questions like 'What is ... in this document?' Derive questions as if you don't know the existence of the documents, just focus to the content.\n\n"
+                                                      f"Here is the page summary: [{page_doc.metadata['page_summary']}]\n\n"
+                                                      f"Here is the sub-page content: [{chunk.page_content}]\n\n"
+                                                      f"If the  sub-page content already contains derived questions, use them as is.")
+
+
+                # ask for question derivation to llm
+                llm_answer = self.llm.ask(context=ctx)
+                # parse answer and obtain questions
+                qs_str += self.__parse_questions(llm_answer)
+
             # add questions to the storage (each question will have the question, metadata, and the page_doc itself)
             for q in qs_str:
                 self._questions.append(q)
@@ -70,6 +94,15 @@ Here is the page content: [{page_doc.page_content}]
             self.t_check_point = time.time()
         if save: self.__save_questions()
         self.__questions_ready = True
+
+
+
+    def __sub_pages(self, page_doc):
+        # First split the doc into small chunks
+        pdf_splitter = PdfSplitter(local_src_path="./storage/sources/uni/graduate_faculty_members.pdf", chunk_size=350, chunk_overlap=150)
+        splits = pdf_splitter.split(docs=[page_doc])
+        for split_doc in splits:
+            yield split_doc
 
     def answer_questions(self):
         if not self.__questions_ready: raise Exception("You are trying to answer questions without deriving questions or feeding a pre-derived question path.")
@@ -103,7 +136,7 @@ Here is the page content: [{page_doc.page_content}]
 
     def __configure_kb(self):
         if self.__kb_configured: return
-        self.__add_summary_to_pages()
+
         # Now obtain different chunk_sized splits to increase accuracy:
         splits1= self.pdf_splitter.split(docs=self.__page_docs)
         splits2 = PdfSplitter(local_src_path="./storage/sources/uni/graduate_faculty_members.pdf", chunk_size=500, chunk_overlap=100).split(docs=self.__page_docs)
@@ -122,7 +155,6 @@ Here is the page content: [{page_doc.page_content}]
 
         cache_dir = os.path.join(ROOT_PATH, "storage", "cross-encoders")
         self.cross_encoder = CrossEncoder(model_name="cross-encoder/ms-marco-MiniLM-L-6-v2", tokenizer_args = {'cache_dir': cache_dir}, automodel_args = {'cache_dir': cache_dir}, max_length=512)
-
 
     def __get_related_pages(self, question:str, max_page_num=5) -> List[Doc]:
         """ This method will return the list of page_docs most-related to the question."""
@@ -196,10 +228,16 @@ Here is the page content: [{page_doc.page_content}]
     def __parse_answer(self, llm_answer):
         return llm_answer
 
+    # def __save_questions(self):
+    #     with open(f"./storage/extracted_questions/qs_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S.json')}",
+    #               "w") as file:
+    #         json.dump(self._questions, file)
+
     def __save_questions(self):
         with open(f"./storage/extracted_questions/qs_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S.json')}",
                   "w") as file:
-            json.dump(self._questions, file)
+            for question in self._questions:
+                file.write(json.dumps(question) + '\n')
 
     def __load_questions(self, path:str):
         with open(path, 'r') as file:

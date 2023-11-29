@@ -9,5 +9,5 @@ from utils.enums import MistralTypes
 # qa_constructor.create_qa_pairs()
 
 
-qa_constructor = MistralQAConstructorAdvanced()
+qa_constructor = MistralQAConstructorAdvanced(proxy_llm_url="http://7c0f-34-141-138-149.ngrok-free.app/ask")
 qa_constructor.create_qa_pairs(save_questions=True)
