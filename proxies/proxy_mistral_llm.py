@@ -18,6 +18,8 @@ class ProxyMistralLLM:
         data = json.dumps({"query": model_input_str}, ensure_ascii=False).encode('utf-8')
         response = requests.post(self.__endpoint_url, data=data, headers={'Content-Type': 'application/json; charset=utf-8'})
         answer = json.loads(response.text)["answer"]
+        print("LLM Answer:", answer)
+        print("-------------------------")
         return answer
 
 

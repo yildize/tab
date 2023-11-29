@@ -26,13 +26,14 @@ class MistralQAConstructorAdvanced:
         def __init__(self, q, a, metadata):
             self.q, self.a, self.metadata = q, a, metadata
 
-    def __init__(self, derived_questions_path: str = None, proxy_llm_url:str = None):
+    def __init__(self, derived_questions_path: str = None, proxy_llm_url:str = None, source_docs_path:str=None):
+        self.source_docs_path = source_docs_path
         # Prepare the llm
         #self.llm = MistralLLM(mistral_type=MistralTypes.GPTQ_4bit)
         self.llm = ProxyMistralLLM(endpoint_url=proxy_llm_url)
 
         # Obtain the pages with index and summary:
-        self.pdf_splitter = PdfSplitter(local_src_path="./storage/sources/uni/graduate_faculty_members.pdf", chunk_size=1000, chunk_overlap=0)
+        self.pdf_splitter = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=1000, chunk_overlap=0)
         self.__page_docs = self.pdf_splitter.split(load_only=True, add_doc_index=True)
         #self.__reformat_page_contents()
 
@@ -54,35 +55,15 @@ class MistralQAConstructorAdvanced:
         ctx = MistralContext()
         ctx.add_user_message(entry="...")
         for i,page_doc in enumerate(self.__page_docs):
-            # update ctx with page_doc.content
-            ctx.update_last_message_content(entry=f"Based on the following page content, please generate a comprehensive list of useful/practical questions. "
-                                                  f"These questions should mimic those that might be asked by a student or teacher who is not AWARE of the document, focusing on practical and significant aspects. "
-                                                  f"You CAN NOT ask questions like 'What is ... in this document?' Derive questions as if you don't know the existence of the documents, just focus to the content.\n\n"
-                                                  f"Here is the page summary: [{page_doc.metadata['page_summary']}]\n\n"
-                                                  f"Here is the page content: [{page_doc.page_content}]\n\n"
-                                                  f"If the page content already contains derived questions, use them as is.")
-
-
-            # ask for question derivation to llm
+            ctx = ready_ctxs.advanced_q_derive(page_summary=page_doc.metadata["page_summary"], page_content=page_doc.page_content)
             llm_answer = self.llm.ask(context=ctx)
-            # parse answer and obtain questions
             qs_str = self.__parse_questions(llm_answer.strip())
 
             # For the current page derive extra questions on sub-chunks:
             for chunk in self.__sub_pages(page_doc=page_doc):
-                # update ctx with page_doc.content
-                ctx.update_last_message_content(entry=f"I will provide you with a sub-page content and a short summary of what was the page that the sub-page is derived from was about."
-                                                      f"Based on ONLY the following sub-page content, please generate a list of useful/practical questions. "
-                                                      f"These questions should mimic those that might be asked by a student or teacher unfamiliar with the document, focusing on practical and significant aspects."
-                                                      f"You CAN NOT ask questions like 'What is ... in this document?' Derive questions as if you don't know the existence of the documents, just focus to the content.\n\n"
-                                                      f"Here is the page summary: [{page_doc.metadata['page_summary']}]\n\n"
-                                                      f"Here is the sub-page content: [{chunk.page_content}]\n\n"
-                                                      f"If the  sub-page content already contains derived questions, use them as is.")
-
-
-                # ask for question derivation to llm
+                formatted_questions = "\n".join([f"{i+1}. {q_str}" for i, q_str in enumerate(qs_str)])
+                ctx = ready_ctxs.advanced_sub_q_derive(page_summary=chunk.metadata["page_summary"], page_content=page_doc.page_content, prev_questions=formatted_questions)
                 llm_answer = self.llm.ask(context=ctx)
-                # parse answer and obtain questions
                 qs_str += self.__parse_questions(llm_answer)
 
             # add questions to the storage (each question will have the question, metadata, and the page_doc itself)
@@ -95,11 +76,9 @@ class MistralQAConstructorAdvanced:
         if save: self.__save_questions()
         self.__questions_ready = True
 
-
-
     def __sub_pages(self, page_doc):
         # First split the doc into small chunks
-        pdf_splitter = PdfSplitter(local_src_path="./storage/sources/uni/graduate_faculty_members.pdf", chunk_size=350, chunk_overlap=150)
+        pdf_splitter = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=600, chunk_overlap=100)
         splits = pdf_splitter.split(docs=[page_doc])
         for split_doc in splits:
             yield split_doc
@@ -139,9 +118,9 @@ class MistralQAConstructorAdvanced:
 
         # Now obtain different chunk_sized splits to increase accuracy:
         splits1= self.pdf_splitter.split(docs=self.__page_docs)
-        splits2 = PdfSplitter(local_src_path="./storage/sources/uni/graduate_faculty_members.pdf", chunk_size=500, chunk_overlap=100).split(docs=self.__page_docs)
-        splits3 = PdfSplitter(local_src_path="./storage/sources/uni/graduate_faculty_members.pdf", chunk_size=250, chunk_overlap=100).split(docs=self.__page_docs)
-        splits4 = PdfSplitter(local_src_path="./storage/sources/uni/graduate_faculty_members.pdf", chunk_size=250, chunk_overlap=100).split(docs=self.__page_docs)
+        splits2 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=500, chunk_overlap=100).split(docs=self.__page_docs)
+        splits3 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=250, chunk_overlap=100).split(docs=self.__page_docs)
+        splits4 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=250, chunk_overlap=100).split(docs=self.__page_docs)
 
         # Finally obtain a List[Doc] consisting of page_summaries:
         summary_docs = self.__obtain_summary_docs()
@@ -207,22 +186,27 @@ class MistralQAConstructorAdvanced:
             summary_docs.append(page)
         return summary_docs
 
+    # def __parse_questions(self, llm_answer):
+    #     # This pattern matches strings that start with a number, followed by a period and a space, and end with a question mark
+    #     pattern = re.compile(r'^(\d+)\.\s(.*\?)', re.MULTILINE)
+    #
+    #     questions = []
+    #     lines = llm_answer.split('\n')
+    #
+    #     for line in lines:
+    #         match = pattern.match(line)
+    #         if match:
+    #             # The second group contains the question
+    #             questions.append(match.group(2))
+    #         elif line.strip():  # Only warn if the line isn't just whitespace
+    #             # If the line does not match the pattern, warn the user
+    #             print(f"Warning: The line '{line}' is not in the expected format. Answer: {llm_answer}")
+    #
+    #     return questions
+
     def __parse_questions(self, llm_answer):
-        # This pattern matches strings that start with a number, followed by a period and a space, and end with a question mark
-        pattern = re.compile(r'^(\d+)\.\s(.*\?)', re.MULTILINE)
-
-        questions = []
-        lines = llm_answer.split('\n')
-
-        for line in lines:
-            match = pattern.match(line)
-            if match:
-                # The second group contains the question
-                questions.append(match.group(2))
-            elif line.strip():  # Only warn if the line isn't just whitespace
-                # If the line does not match the pattern, warn the user
-                print(f"Warning: The line '{line}' is not in the expected format. Answer: {llm_answer}")
-
+        pattern = r'(?i)\b(?:What|How|Can|Who|Is|Are).*?\?'
+        questions = re.findall(pattern, llm_answer)
         return questions
 
     def __parse_answer(self, llm_answer):
@@ -234,8 +218,10 @@ class MistralQAConstructorAdvanced:
     #         json.dump(self._questions, file)
 
     def __save_questions(self):
-        with open(f"./storage/extracted_questions/qs_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S.json')}",
-                  "w") as file:
+        path = f"./storage/extracted_questions/qs_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S.json')}"
+        dir_path = os.path.dirname(path)
+        os.makedirs(dir_path, exist_ok=True)
+        with open(path, "w") as file:
             for question in self._questions:
                 file.write(json.dumps(question) + '\n')
 

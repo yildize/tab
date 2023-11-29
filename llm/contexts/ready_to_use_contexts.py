@@ -60,5 +60,57 @@ class Contexts:
         context.add_user_message(entry=f"...") # Great! Here is your context:\n{context}
         return context
 
+    def advanced_q_derive(self, page_summary, page_content) -> MistralContext:
+        context = MistralContext()
+        context.add_user_message(entry=f""""Generate questions that can be answered using the detailed content provided. These questions should be as if asked by students who have not seen the document. They need to be practical, insightful, and directly related to the information in the reference content. Avoid creating questions that imply knowledge of the document's structure or existence, as the students are unaware of it.
+
+Summary for context: [{page_summary}]
+Detailed content for question generation: [{page_content}]
+
+Examples of suitable questions:
+
+'What is the contact information for Harun Artuner?'
+'What are Fuat AKAL's research areas?'
+Examples of unsuitable questions:
+
+'Who are the new faculty members introduced in this section?'
+'Can you list all the research areas mentioned?'
+Please create questions based on the reference content, considering the provided guidelines.""")
+        return context
+
+    def advanced_sub_q_derive(self, page_summary, page_content, prev_questions):
+        context = MistralContext()
+        context.update_last_message_content(entry=f""""Create questions based on the content of a specific section of a PDF page. These questions should be answerable using only the section's content and formulated as if by students unfamiliar with the entire document. They should be practical, insightful, and appear as naturally occurring inquiries.
+
+Summary of the section for context: [{page_summary}]
+Detailed section content for question generation: [{page_content}]
+Previously derived questions for reference: [{prev_questions}]
+
+Focus on generating questions that delve deeper into the section's content, possibly exploring aspects not covered in the previously derived questions.
+
+Examples of suitable questions:
+
+'What is Harun Artuner's contact information?'
+'What research areas does Fuat AKAL specialize in?'
+Avoid questions like:
+
+'Who are the new faculty members mentioned in this section?'
+'Can you list all research areas in this page?'
+These examples are inappropriate as they reference the document's structure, which students are presumed not to know.
+
+Please generate relevant questions, considering the detailed content of the subpart and the guidelines provided.""")
+
+
+        # # update ctx with page_doc.content
+        # ctx.update_last_message_content(entry=f"I will provide you with a sub-page content and a short summary of what was the page that the sub-page is derived from was about. "
+        #                                       f"Based on ONLY the following sub-page content, please generate a list of independent, stand-alone, focused/content-specific list of useful/practical questions.. "
+        #                                       f"These questions should mimic those that might be asked by a student or teacher unfamiliar with the document, focusing on practical and significant aspects. "
+        #                                       f"You CAN NOT ask questions like 'What is ... in this document?' or 'What is ... of the listed elements? "
+        #                                       f"Derive questions as if you don't know the existence of the documents, just focus to the content.\n\n"
+        #                                       f"Here is the page summary: [{page_doc.metadata['page_summary']}]\n\n"
+        #                                       f"Here is the sub-page content: [{chunk.page_content}]\n\n"
+        #                                       f"Here are some previously derived questions from the page: [{formatted_questions}]\n\n"
+        #                                       f"Derive questions similar to those but possibly forgotten/missed focusing on the sub-page content. "
+        #                                       f"If the  sub-page content already contains derived questions, use them as is.")
 
 ready_ctxs = Contexts()
