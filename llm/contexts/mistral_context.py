@@ -18,4 +18,4 @@ class MistralContext:
         self.messages[-1]["content"] = entry
 
     def __str__(self):
-        return json.dumps(self.messages, indent=4)
+        return json.dumps(self.messages, indent=4, ensure_ascii=False)

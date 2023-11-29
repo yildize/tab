@@ -116,8 +116,9 @@ class MistralQAConstructorAdvanced:
                 pages_content += f"Content {i+1}: [{page_doc.page_content}]\n\n"
 
             ctx.update_last_message_content(entry=f"I will provide you with pages of contents and a 'a user question'. "
-                                                  f"I want you to give a clear and concise answer the user question utilizing the provided page contents.\n\n"
-                                                  f"Here is the user question:\n[{q_str}]'''\n\nHere is the content:\n\n[{pages_content}]")
+                                                  f"I want you to give a clear and concise answer to ONLY the user question utilizing the provided page contents.\n\n"
+                                                  f"Here is the user question:\n[{q_str}]'''\n\nHere is the content:\n\n[{pages_content}]\n\n"
+                                                  f"Only answer the question, keep your answer concise and direct!")
             # ask for answer to llm
             llm_answer = self.llm.ask(context=ctx)
             a_str = self.__parse_answer(llm_answer)
@@ -139,12 +140,13 @@ class MistralQAConstructorAdvanced:
         splits2 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=500, chunk_overlap=100).split(docs=self.__page_docs)
         splits3 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=250, chunk_overlap=50).split(docs=self.__page_docs)
         splits4 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=100, chunk_overlap=0).split(docs=self.__page_docs)
+        #splits5 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=15, chunk_overlap=0).split(docs=self.__page_docs)
 
         # Finally obtain a List[Doc] consisting of page_summaries:
         summary_docs = self.__obtain_summary_docs()
 
         # Obtain a single split list:
-        self.__splits = splits1 + splits2 + splits3 + splits4 + summary_docs
+        self.__splits = splits1 + splits2 + splits3 + splits4 + summary_docs # + splits5
 
         # Now prepare a knowledge base with the constructed splits
         self.kb = DefaultKnowledgeBase(docs=self.__splits, embedder_name="msmarco-MiniLM-L-6-v3") #  # all-mpnet-base-v2
@@ -239,11 +241,11 @@ class MistralQAConstructorAdvanced:
         path = f"./storage/extracted_questions/qs_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.json"
         dir_path = os.path.dirname(path)
         os.makedirs(dir_path, exist_ok=True)
-        with open(path, "w") as file:
+        with open(path, "w", encoding='utf-8') as file:
             json.dump(self._questions, file, indent=4)
 
     def __load_questions(self, path:str):
-        with open(path, 'r') as file:
+        with open(path, 'r', encoding='utf-8') as file:
             questions = json.load(file)
         return questions
 
