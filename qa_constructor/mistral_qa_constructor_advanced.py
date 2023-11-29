@@ -79,7 +79,7 @@ class MistralQAConstructorAdvanced:
             # For the current page derive extra questions on sub-chunks:
             for chunk in self.__sub_pages(page_doc=page_doc):
                 formatted_questions = "\n".join([f"{i+1}. {q_str}" for i, q_str in enumerate(qs_str)])
-                ctx = ready_ctxs.advanced_sub_q_derive(page_summary=chunk.metadata["page_summary"], page_content=page_doc.page_content, prev_questions=formatted_questions)
+                ctx = ready_ctxs.advanced_sub_q_derive(page_summary=chunk.metadata["page_summary"], page_content=chunk.page_content, prev_questions=formatted_questions)
                 llm_answer = self.llm.ask(context=ctx)
                 qs_str += self.__parse_questions(llm_answer)
 
@@ -108,7 +108,7 @@ class MistralQAConstructorAdvanced:
         # ready question answering context
         ctx = MistralContext()
         ctx.add_user_message(entry="...")
-        for i,q_str in enumerate(self._questions):
+        for qi,q_str in enumerate(self._questions):
             # update ctx with string question and the doc content
             related_pages = self.__get_related_pages(question=q_str)
             pages_content = ""
@@ -123,7 +123,7 @@ class MistralQAConstructorAdvanced:
             a_str = self.__parse_answer(llm_answer)
             # construct qa pairs
             self.qa_pairs.add_pair(QAPair(q=q_str, a=a_str, m=[page.metadata for page in related_pages]))
-            print(f"{i+1}/{len(self._questions)} is answered it took {(time.time()-self.t_check_point):.2f} seconds.")
+            print(f"{qi+1}/{len(self._questions)} is answered it took {(time.time()-self.t_check_point):.2f} seconds.")
             self.t_check_point = time.time()
 
     def create_qa_pairs(self, save_questions=True):
@@ -236,12 +236,11 @@ class MistralQAConstructorAdvanced:
     #         json.dump(self._questions, file)
 
     def __save_questions(self):
-        path = f"./storage/extracted_questions/qs_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S.json')}"
+        path = f"./storage/extracted_questions/qs_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.json"
         dir_path = os.path.dirname(path)
         os.makedirs(dir_path, exist_ok=True)
         with open(path, "w") as file:
-            for question in self._questions:
-                file.write(json.dumps(question) + '\n')
+            json.dump(self._questions, file, indent=4)
 
     def __load_questions(self, path:str):
         with open(path, 'r') as file:
