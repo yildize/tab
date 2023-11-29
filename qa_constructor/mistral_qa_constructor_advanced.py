@@ -1,7 +1,10 @@
 import json
 import os
 import numpy as np
+import pickle
 from typing import List
+
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 from knowledge_base.default_kb import DefaultKnowledgeBase
 from llm.contexts.mistral_context import MistralContext
@@ -26,7 +29,7 @@ class MistralQAConstructorAdvanced:
         def __init__(self, q, a, metadata):
             self.q, self.a, self.metadata = q, a, metadata
 
-    def __init__(self, derived_questions_path: str = None, proxy_llm_url:str = None, source_docs_path:str=None):
+    def __init__(self, derived_questions_path: str = None, proxy_llm_url:str = None, source_docs_path:str=None, ready_docs_path:str=None):
         self.source_docs_path = source_docs_path
         # Prepare the llm
         #self.llm = MistralLLM(mistral_type=MistralTypes.GPTQ_4bit)
@@ -34,10 +37,14 @@ class MistralQAConstructorAdvanced:
 
         # Obtain the pages with index and summary:
         self.pdf_splitter = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=1000, chunk_overlap=0)
-        self.__page_docs = self.pdf_splitter.split(load_only=True, add_doc_index=True)
+        if ready_docs_path:
+            # todo: update splitter logic, if docs are already given I don't need to provide a source_docs_path to splitter since I won't need it.
+            self.__page_docs = self.__load_docs(path=ready_docs_path)
+        else:
+            self.__page_docs = self.pdf_splitter.split(load_only=True, add_doc_index=True)
+            self.__add_summary_to_pages()
+            self.__save_docs()
         #self.__reformat_page_contents()
-
-        self.__add_summary_to_pages()
 
         # Prepare the storage items
         self._questions: List[str] = [] if derived_questions_path is None else self.__load_questions(path=derived_questions_path)
@@ -50,7 +57,15 @@ class MistralQAConstructorAdvanced:
         # Just for debugging
         self.t_check_point = time.time()
 
-
+    def __save_docs(self):
+        path = f"./storage/docs/docs_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S.pkl')}"
+        dir_path = os.path.dirname(path)
+        os.makedirs(dir_path, exist_ok=True)
+        with open(path, 'wb') as file:
+            pickle.dump(self.__page_docs, file)
+    def __load_docs(self, path:str):
+        with open(path, 'rb') as file:
+            return pickle.load(file)
 
     def create_questions(self, save=True):
         # ready question derivation context
@@ -120,10 +135,10 @@ class MistralQAConstructorAdvanced:
         if self.__kb_configured: return
 
         # Now obtain different chunk_sized splits to increase accuracy:
-        splits1= self.pdf_splitter.split(docs=self.__page_docs)
+        splits1 = self.pdf_splitter.split(docs=self.__page_docs)
         splits2 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=500, chunk_overlap=100).split(docs=self.__page_docs)
-        splits3 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=250, chunk_overlap=100).split(docs=self.__page_docs)
-        splits4 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=250, chunk_overlap=100).split(docs=self.__page_docs)
+        splits3 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=250, chunk_overlap=50).split(docs=self.__page_docs)
+        splits4 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=100, chunk_overlap=0).split(docs=self.__page_docs)
 
         # Finally obtain a List[Doc] consisting of page_summaries:
         summary_docs = self.__obtain_summary_docs()
