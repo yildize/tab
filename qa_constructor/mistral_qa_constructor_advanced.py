@@ -77,11 +77,11 @@ class MistralQAConstructorAdvanced:
             qs_str = self.__parse_questions(llm_answer.strip())
 
             # For the current page derive extra questions on sub-chunks:
-            for chunk in self.__sub_pages(page_doc=page_doc):
-                formatted_questions = "\n".join([f"{i+1}. {q_str}" for i, q_str in enumerate(qs_str)])
-                ctx = ready_ctxs.advanced_sub_q_derive(page_summary=chunk.metadata["page_summary"], page_content=chunk.page_content, prev_questions=formatted_questions)
-                llm_answer = self.llm.ask(context=ctx)
-                qs_str += self.__parse_questions(llm_answer)
+            # for chunk in self.__sub_pages(page_doc=page_doc):
+            #     formatted_questions = "\n".join([f"{i+1}. {q_str}" for i, q_str in enumerate(qs_str)])
+            #     ctx = ready_ctxs.advanced_sub_q_derive(page_summary=chunk.metadata["page_summary"], page_content=chunk.page_content, prev_questions=formatted_questions)
+            #     llm_answer = self.llm.ask(context=ctx)
+            #     qs_str += self.__parse_questions(llm_answer)
 
             # add questions to the storage (each question will have the question, metadata, and the page_doc itself)
             for q in qs_str:
@@ -140,7 +140,7 @@ class MistralQAConstructorAdvanced:
         splits2 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=500, chunk_overlap=100).split(docs=self.__page_docs)
         splits3 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=250, chunk_overlap=50).split(docs=self.__page_docs)
         splits4 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=100, chunk_overlap=0).split(docs=self.__page_docs)
-        #splits5 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=15, chunk_overlap=0).split(docs=self.__page_docs)
+        splits5 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=15, chunk_overlap=0).split(docs=self.__page_docs)
 
         # Finally obtain a List[Doc] consisting of page_summaries:
         summary_docs = self.__obtain_summary_docs()
@@ -183,7 +183,7 @@ class MistralQAConstructorAdvanced:
     def __add_summary_to_pages(self) -> None:
         """ This method adds a summary for each page, later will be used for indexing."""
         previous_page_summary = "No summary found."
-        for page_doc in self.__page_docs:
+        for i, page_doc in enumerate(self.__page_docs):
             prompt = f"Based on the content provided, determine if it continues the topic from the previous summary or introduces a new subject. " \
                      f"Summarize the main theme or content of this page in a single, brief sentence, avoiding specific details. " \
                      f"The summary should be general and succinct, suitable for quick indexing.\n\n" \
@@ -194,6 +194,7 @@ class MistralQAConstructorAdvanced:
             page_summary = self.llm.ask(context=ctx)
             page_doc.metadata["page_summary"] = page_summary
             previous_page_summary = page_summary
+            print(f"Summary of page {i}/{len(self.__page_docs)}")
 
 
     def __obtain_summary_docs(self) -> List[Doc]:
