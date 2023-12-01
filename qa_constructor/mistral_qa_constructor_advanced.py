@@ -72,7 +72,8 @@ class MistralQAConstructorAdvanced:
         ctx = MistralContext()
         ctx.add_user_message(entry="...")
         for i,page_doc in enumerate(self.__page_docs):
-            ctx = ready_ctxs.advanced_q_derive(page_summary=page_doc.metadata["page_summary"], page_content=page_doc.page_content)
+            # todo : wizard - mistral?
+            ctx = ready_ctxs.advanced_q_derive_wizard(page_summary=page_doc.metadata["page_summary"], page_content=page_doc.page_content)
             llm_answer = self.llm.ask(context=ctx)
             qs_str = self.__parse_questions(llm_answer.strip())
 
@@ -101,7 +102,7 @@ class MistralQAConstructorAdvanced:
         for split_doc in splits:
             yield split_doc
 
-    def answer_questions(self):
+    def answer_questions(self, save_in_every_nth:int=10):
         if not self.__questions_ready: raise Exception("You are trying to answer questions without deriving questions or feeding a pre-derived question path.")
         self.__configure_kb() # Configure the knowledge base for advanced answering.
 
@@ -126,6 +127,7 @@ class MistralQAConstructorAdvanced:
             self.qa_pairs.add_pair(QAPair(q=q_str, a=a_str, m=[page.metadata for page in related_pages]))
             print(f"{qi+1}/{len(self._questions)} is answered it took {(time.time()-self.t_check_point):.2f} seconds.")
             self.t_check_point = time.time()
+            if qi+1%save_in_every_nth==0: self.qa_pairs.save_to_json(f"./storage/extracted_questions/qas_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S.json')}")
 
     def create_qa_pairs(self, save_questions=True):
         self.create_questions(save=save_questions)
