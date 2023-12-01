@@ -109,7 +109,8 @@ class MistralQAConstructorAdvanced:
         # ready question answering context
         ctx = MistralContext()
         ctx.add_user_message(entry="...")
-        for qi,q_str in enumerate(self._questions[start_index:]):
+        for qi, q_str in enumerate(self._questions[start_index:]):
+            qi += start_index
             # update ctx with string question and the doc content
             related_pages = self.__get_related_pages(question=q_str)
             pages_content = ""
