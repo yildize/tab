@@ -60,23 +60,48 @@ class Contexts:
         context.add_user_message(entry=f"...") # Great! Here is your context:\n{context}
         return context
 
+#     def advanced_q_derive(self, page_summary, page_content) -> MistralContext:
+#         context = MistralContext()
+#         context.add_user_message(entry=f""""Generate questions that can be answered using the detailed content provided.
+# These questions should be as if asked by students who have not seen the document.
+# They need to be practical, insightful, and directly related to the information in the reference content.
+# Avoid creating questions that imply knowledge of the document's structure or existence, as the students are unaware of it.
+#
+# Summary for context: [{page_summary}]
+# Detailed content for question generation: [{page_content}]
+#
+# Examples of suitable questions:
+#
+# 'What is the contact information for Harun Artuner?'
+# 'What are Fuat AKAL's research areas?'
+#
+# Examples of unsuitable questions:
+# 'Who are the new faculty members introduced in this section?'
+# 'Can you list all the research areas mentioned?'
+#
+# Please create questions based on the reference content, considering the provided guidelines.""")
+#         return context
+
     def advanced_q_derive(self, page_summary, page_content) -> MistralContext:
-        context = MistralContext()
-        context.add_user_message(entry=f""""Generate questions that can be answered using the detailed content provided. These questions should be as if asked by students who have not seen the document. They need to be practical, insightful, and directly related to the information in the reference content. Avoid creating questions that imply knowledge of the document's structure or existence, as the students are unaware of it.
+            context = MistralContext()
+            context.add_user_message(entry=f"""Assume you are a new student for Hacettepe University Computer Engineering Department.
+I will provide you a page-summary and 'detailed page content' from department's website.
+Generate me a comprehensive list of practical questions that the following 'detailed page content' is answering to. 
+Those questions should mimic potential new student questions who is not aware of the document itself.
+Focus on what questions is information provided is answering to.
 
 Summary for context: [{page_summary}]
 Detailed content for question generation: [{page_content}]
 
 Examples of suitable questions:
-
 'What is the contact information for Harun Artuner?'
 'What are Fuat AKAL's research areas?'
-Examples of unsuitable questions:
 
+Examples of unsuitable questions due to referring to the document, students won't be aware of the document:
 'Who are the new faculty members introduced in this section?'
 'Can you list all the research areas mentioned?'
-Please create questions based on the reference content, considering the provided guidelines.""")
-        return context
+""")
+            return context
 
     def advanced_sub_q_derive(self, page_summary, page_content, prev_questions):
         context = MistralContext()
