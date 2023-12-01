@@ -9,11 +9,10 @@ class DummyQCleaner:
     a more capable cleaner or maybe a correcter utilizing an LLM. That is why I call this class as dummy."""
     def __init__(self, file_path:str, banned_phrases=("this document",)):
         self._file_path = file_path
-        with open(file_path, 'r') as json_file:
+        with open(file_path, 'r', encoding='utf-8') as json_file:
             self._q_list: List[str] = json.load(json_file)
         self._banned_phrases = banned_phrases
-
-        self._counter = Counter(dict_elm["question"] for dict_elm in self._q_list)
+        self._counter = Counter(q for q in self._q_list)
 
     def clean(self):
         cleaned_q_list = []

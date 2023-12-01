@@ -72,7 +72,8 @@ class MistralQAConstructorAdvanced:
         ctx = MistralContext()
         ctx.add_user_message(entry="...")
         for i,page_doc in enumerate(self.__page_docs):
-            ctx = ready_ctxs.advanced_q_derive(page_summary=page_doc.metadata["page_summary"], page_content=page_doc.page_content)
+            # todo : wizard - mistral?
+            ctx = ready_ctxs.advanced_q_derive_wizard(page_summary=page_doc.metadata["page_summary"], page_content=page_doc.page_content)
             llm_answer = self.llm.ask(context=ctx)
             qs_str = self.__parse_questions(llm_answer.strip())
 
@@ -101,24 +102,27 @@ class MistralQAConstructorAdvanced:
         for split_doc in splits:
             yield split_doc
 
-    def answer_questions(self):
+    def answer_questions(self, start_index=0, save_in_every_nth:int=10):
         if not self.__questions_ready: raise Exception("You are trying to answer questions without deriving questions or feeding a pre-derived question path.")
         self.__configure_kb() # Configure the knowledge base for advanced answering.
 
         # ready question answering context
         ctx = MistralContext()
         ctx.add_user_message(entry="...")
-        for qi,q_str in enumerate(self._questions):
+        for qi, q_str in enumerate(self._questions[start_index:]):
+            qi += start_index
             # update ctx with string question and the doc content
             related_pages = self.__get_related_pages(question=q_str)
             pages_content = ""
             for i, page_doc in enumerate(related_pages):
                 pages_content += f"Content {i+1}: [{page_doc.page_content}]\n\n"
 
-            ctx.update_last_message_content(entry=f"I will provide you with pages of contents and a 'a user question'. "
-                                                  f"I want you to give a clear and concise answer to ONLY the user question utilizing the provided page contents.\n\n"
-                                                  f"Here is the user question:\n[{q_str}]'''\n\nHere is the content:\n\n[{pages_content}]\n\n"
-                                                  f"Only answer the question, keep your answer concise and direct!")
+            ctx.update_last_message_content(entry=f"Assume you are an helpful and kind Information Manager Officer Hacettepe University Computer Engineering Department."
+                                                  f"Your job is to help students by answering their questions. You will be answering student questions regarding some documents."
+                                                  f"I will provide you with pages of contents and the student question. "
+                                                  f"I want you to give a clear and concise answer to the student question utilizing the provided page contents.\n\n"
+                                                  f"Here is the user question:\n[{q_str}]'''\n\nHere is the content:\n\n[{pages_content}]\n\n")
+
             # ask for answer to llm
             llm_answer = self.llm.ask(context=ctx)
             a_str = self.__parse_answer(llm_answer)
@@ -126,6 +130,8 @@ class MistralQAConstructorAdvanced:
             self.qa_pairs.add_pair(QAPair(q=q_str, a=a_str, m=[page.metadata for page in related_pages]))
             print(f"{qi+1}/{len(self._questions)} is answered it took {(time.time()-self.t_check_point):.2f} seconds.")
             self.t_check_point = time.time()
+            if qi % save_in_every_nth == 0:
+                self.qa_pairs.save_to_json(f"./storage/extracted_questions/qas_index_{start_index}_to_{qi}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S.json')}")
 
     def create_qa_pairs(self, save_questions=True):
         self.create_questions(save=save_questions)
@@ -140,13 +146,13 @@ class MistralQAConstructorAdvanced:
         splits2 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=500, chunk_overlap=100).split(docs=self.__page_docs)
         splits3 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=250, chunk_overlap=50).split(docs=self.__page_docs)
         splits4 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=100, chunk_overlap=0).split(docs=self.__page_docs)
-        splits5 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=15, chunk_overlap=0).split(docs=self.__page_docs)
+        splits5 = PdfSplitter(local_src_path=self.source_docs_path, chunk_size=25, chunk_overlap=0).split(docs=self.__page_docs)
 
         # Finally obtain a List[Doc] consisting of page_summaries:
         summary_docs = self.__obtain_summary_docs()
 
         # Obtain a single split list:
-        self.__splits = splits1 + splits2 + splits3 + splits4 + summary_docs # + splits5
+        self.__splits = splits1 + splits2 + splits3 + splits4 + splits5 + summary_docs
 
         # Now prepare a knowledge base with the constructed splits
         self.kb = DefaultKnowledgeBase(docs=self.__splits, embedder_name="msmarco-MiniLM-L-6-v3") #  # all-mpnet-base-v2
@@ -155,7 +161,7 @@ class MistralQAConstructorAdvanced:
         cache_dir = os.path.join(ROOT_PATH, "storage", "cross-encoders")
         self.cross_encoder = CrossEncoder(model_name="cross-encoder/ms-marco-MiniLM-L-6-v2", tokenizer_args = {'cache_dir': cache_dir}, automodel_args = {'cache_dir': cache_dir}, max_length=512)
 
-    def __get_related_pages(self, question:str, max_page_num=5) -> List[Doc]:
+    def __get_related_pages(self, question:str, max_page_num=7) -> List[Doc]:
         """ This method will return the list of page_docs most-related to the question."""
         similar_docs = self.kb.search(q=question, k=20)
 
@@ -165,6 +171,7 @@ class MistralQAConstructorAdvanced:
         docs_indexes = set()
         for i in sorted_indices:
             doc = similar_docs[i]
+            doc.metadata["cross_score"] = scores[i]
             docs_indexes.add(doc.metadata["doc_index"])
             if len(docs_indexes) >= max_page_num: break
 

@@ -103,6 +103,22 @@ Examples of unsuitable questions due to referring to the document, students won'
 """)
             return context
 
+    def advanced_q_derive_wizard(self, page_summary, page_content) -> str:
+        return f""""Generate questions that can be answered using the detailed content provided. These questions should be as if asked by students who have not seen the document. They need to be practical, insightful, and directly related to the information in the reference content. Avoid creating questions that imply knowledge of the document's structure or existence, as the students are unaware of it.
+
+Summary for context: [{page_summary}]
+Detailed content for question generation: [{page_content}]
+
+Examples of suitable questions:
+
+'What is the contact information for Harun Artuner?'
+'What are Fuat AKAL's research areas?'
+Examples of unsuitable questions:
+
+'Who are the new faculty members introduced in this section?'
+'Can you list all the research areas mentioned?'
+Please create questions based on the reference content, considering the provided guidelines."""
+
     def advanced_sub_q_derive(self, page_summary, page_content, prev_questions):
         context = MistralContext()
         context.add_user_message(entry=f""""Create new un-derived questions based on the content of a specific section of a PDF page. These questions should be answerable using only the section's content and formulated as if by students unfamiliar with the entire document. They should be practical, insightful, and appear as naturally occurring inquiries.
