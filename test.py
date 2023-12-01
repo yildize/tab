@@ -8,10 +8,9 @@ from utils.enums import MistralTypes
 # qa_constructor = MistralQAConstructor()
 # qa_constructor.create_qa_pairs()
 
-from ctransformers import AutoModelForCausalLM
+qa_constructor = MistralQAConstructorAdvanced(derived_questions_path="./storage/extracted_questions/qs_uni.json",
+                                              ready_docs_path="./storage/docs/docs_2023-11-30_13-54-03.pkl",
+                                              proxy_llm_url="http://97fd-34-124-221-162.ngrok-free.app/ask",
+                                              source_docs_path="./storage/sources/uni-alt")
+qa_constructor.answer_questions(start_index=0, save_in_every_nth=25)
 
-qa_constructor = MistralQAConstructorAdvanced(ready_docs_path="./storage/docs/docs_2023-11-30_13-54-03.pkl", proxy_llm_url="http://f3e7-34-125-105-188.ngrok-free.app/ask", source_docs_path="./storage/sources/uni-alt")
-qa_constructor.create_qa_pairs(save_questions=True)
-#qa_constructor.answer_questions()
-
-from ctransformers import AutoModelForCausalLM

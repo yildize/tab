@@ -81,7 +81,7 @@ class QAS:
         # Convert the list of QAPair objects to a list of dictionaries
         storage_as_dicts = [qa_pair.to_dict() for qa_pair in self.storage]
         # Serialize the list of dictionaries to JSON and write it to a file
-        with open(file_path, 'w') as json_file:
+        with open(file_path, 'w', encoding='utf-8') as json_file:
             json.dump(storage_as_dicts, json_file, ensure_ascii=False, indent=4)
 
     def save_as_docs(self, file_path:str):
