@@ -41,6 +41,7 @@ class MistralQAConstructorAdvanced:
             # todo: update splitter logic, if docs are already given I don't need to provide a source_docs_path to splitter since I won't need it.
             self.__page_docs = self.__load_docs(path=ready_docs_path)
         else:
+            # When it is initiated without ready docs, it will add page_summaries to pages and save the new docs.
             self.__page_docs = self.pdf_splitter.split(load_only=True, add_doc_index=True)
             self.__add_summary_to_pages()
             self.__save_docs()
