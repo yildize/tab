@@ -24,9 +24,22 @@ ROOT_PATH = root_path()
 def load_docs(docs_path: str):
     """ This function is used to load a pickle object."""
     if not os.path.isabs(docs_path): docs_path = os.path.join(ROOT_PATH, docs_path)
-    with open(docs_path, 'rb', encoding='utf-8') as file:
+    with open(docs_path, 'rb') as file:
         return pickle.load(file)
 
+def save_docs(docs, docs_path: str):
+    """
+    This function is used to save a doc object as a pickle file.
+    """
+    if not os.path.isabs(docs_path):
+        docs_path = os.path.join(ROOT_PATH, docs_path)
+
+    # Create the directory if it doesn't exist
+    os.makedirs(os.path.dirname(docs_path), exist_ok=True)
+
+    # Save the object
+    with open(docs_path, 'wb') as file:
+        pickle.dump(docs, file)
 
 def load_qa_pairs_json_as_docs(qa_pairs_json_path: str) -> List[Doc]:
     """ This function is used to load question-answer pair json file as a List[Doc] by embedding answer into metadata."""
