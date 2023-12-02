@@ -24,7 +24,7 @@ ROOT_PATH = root_path()
 def load_docs(docs_path: str):
     """ This function is used to load a pickle object."""
     if not os.path.isabs(docs_path): docs_path = os.path.join(ROOT_PATH, docs_path)
-    with open(docs_path, 'rb') as file:
+    with open(docs_path, 'rb', encoding='utf-8') as file:
         return pickle.load(file)
 
 

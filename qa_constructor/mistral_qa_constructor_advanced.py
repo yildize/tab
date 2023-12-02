@@ -171,7 +171,7 @@ class MistralQAConstructorAdvanced:
         docs_indexes = set()
         for i in sorted_indices:
             doc = similar_docs[i]
-            doc.metadata["cross_score"] = scores[i]
+            #doc.metadata["cross_score"] = scores[i]  this won't work because kb.search results are copied docs
             docs_indexes.add(doc.metadata["doc_index"])
             if len(docs_indexes) >= max_page_num: break
 

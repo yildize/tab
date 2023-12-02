@@ -10,7 +10,7 @@ from utils.enums import MistralTypes
 
 qa_constructor = MistralQAConstructorAdvanced(derived_questions_path="./storage/extracted_questions/qs_uni.json",
                                               ready_docs_path="./storage/docs/docs_2023-11-30_13-54-03.pkl",
-                                              proxy_llm_url="http://97fd-34-124-221-162.ngrok-free.app/ask",
+                                              proxy_llm_url="http://df53-34-87-139-234.ngrok.io/ask",
                                               source_docs_path="./storage/sources/uni-alt")
-qa_constructor.answer_questions(start_index=91, save_in_every_nth=10)
+qa_constructor.answer_questions(start_index=551, save_in_every_nth=10)
 
