@@ -202,7 +202,7 @@ class MistralQAConstructorAdvanced:
             page_summary = self.llm.ask(context=ctx)
             page_doc.metadata["page_summary"] = page_summary
             previous_page_summary = page_summary
-            print(f"Summary of page {i+1}/{len(self.__page_docs)}")
+            print(f"Summary of page {i}/{len(self.__page_docs)}")
 
 
     def __obtain_summary_docs(self) -> List[Doc]:

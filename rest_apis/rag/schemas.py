@@ -1,23 +1,24 @@
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, validate
 from dataclasses import dataclass
 from typing import Optional
 
 
 @dataclass
-class KBQuery:
-    content: str
-    k: Optional[int] = None
-    cross_encoder_input_k: Optional[int] = None
+class RAGQuery:
+    question: str
+    k: Optional[int] = 5
+    cross_encoder_input_k: Optional[int] = 20
 
 
-class KBQuerySchema(Schema):
-    content = fields.Str(required=True, error_messages={'required': 'content field is required.'})
+class RagQuerySchema(Schema):
+    question = fields.Str(required=True, error_messages={'required': 'question field is required.'})
     k = fields.Int(error_messages={'validator_failed': 'k field must be an integer.'})
-    cross_encoder_input_k = fields.Int(error_messages={'validator_failed': 'k field must be an integer.'})
+    cross_encoder_input_k = fields.Int(validate=validate.Range(min=1, max=100), error_messages={'validator_failed': 'cross_encoder_input_k field must be an integer between 1 and 100.'})
 # If content is not there, error will be thrown since it is required.
 # If a new field is there, error will be thrown during load.
 
-kb_query_schema = KBQuerySchema()
+
+rag_query_schema = RagQuerySchema()
 
 
 # Following schemas will be used for dump. If the fields are not there it is no problem for dump.
@@ -45,3 +46,4 @@ class DocSchema(Schema):
 
 
 doc_schema = DocSchema()
+metadata_schema = MetadataSchema()

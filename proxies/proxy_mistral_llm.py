@@ -18,13 +18,13 @@ class ProxyMistralLLM:
         data = json.dumps({"query": model_input_str}, ensure_ascii=False).encode('utf-8')
         response = requests.post(self.__endpoint_url, data=data, headers={'Content-Type': 'application/json; charset=utf-8'})
         answer = json.loads(response.text)["answer"]
-        print("LLM Answer:", answer)
-        print("-------------------------")
+        #print("LLM Answer:", answer)
+        #print("-------------------------")
         return answer
 
 
 if __name__ == "__main__":
-    llm = ProxyMistralLLM(endpoint_url="http://81d3-34-118-241-70.ngrok-free.app/ask")
+    llm = ProxyMistralLLM(endpoint_url="http://a7fa-34-80-134-151.ngrok-free.app/ask")
     ctx = MistralContext()
     ctx.add_user_message(entry="Who are you?")
     answer = llm.ask(context=ctx)

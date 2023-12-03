@@ -17,7 +17,7 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 @app.route('/')
 def index():
-    return {"message": "/search endpoint expects a query {content:str, k?:int}"}
+    return {"message": "/search endpoint expects a query {content:str, k?:int}  --- /search_pages endpoint expects a query {content:str, k?:int, cross_encoder_input_k?:int}"}
 
 
 @app.route('/search', methods=['POST'])
@@ -51,9 +51,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     args.source_type = "docs"
-    args.source_path = "./storage/docs/summarized_docs_split.pkl"
+    args.source_path = "./storage/docs/uni-ntn-summarized-split.pkl"  # path of split chunks
     args.cross_encoder_name = "cross-encoder/ms-marco-MiniLM-L-6-v2"
-    args.page_docs_path = "./storage/docs/summarized_docs.pkl"
+    args.page_docs_path = "./storage/docs/uni-ntn-summarized-pages.pkl"  # path of pages for page search
 
     if args.source_type == 'pdfs':
         pdf_splitter = PdfSplitter(local_src_path=args.source_path, chunk_size=args.chunk_size, chunk_overlap=args.chunk_overlap)
@@ -63,8 +63,7 @@ if __name__ == '__main__':
     else:  # "docs"
         docs = load_docs(docs_path=args.source_path)
 
-    page_docs = load_docs(docs_path=args.page_docs_path) if args.page_docs_path is not None else None
-    kb = DefaultKnowledgeBase(docs=docs, embedder_name=args.embedder_name, cross_encoder_name=args.cross_encoder_name, page_docs=page_docs) # use lock for thread safety
+    kb = DefaultKnowledgeBase(docs=docs, embedder_name=args.embedder_name, cross_encoder_name=args.cross_encoder_name, page_docs=args.page_docs_path) # use lock for thread safety
 
     if args.serve_style == "waitress":
         from waitress import serve

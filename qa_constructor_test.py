@@ -8,9 +8,14 @@ from utils.enums import MistralTypes
 # qa_constructor = MistralQAConstructor()
 # qa_constructor.create_qa_pairs()
 
-qa_constructor = MistralQAConstructorAdvanced(derived_questions_path="./storage/extracted_questions/qs_uni.json",
-                                              ready_docs_path="./storage/docs/docs_2023-11-30_13-54-03.pkl",
-                                              proxy_llm_url="http://df53-34-87-139-234.ngrok.io/ask",
+qa_constructor = MistralQAConstructorAdvanced(#derived_questions_path="./storage/extracted_questions/qs_uni.json",
+                                              #ready_docs_path="./storage/docs/docs_2023-11-30_13-54-03.pkl",
+                                              proxy_llm_url="http://3fe1-35-196-54-177.ngrok-free.app/ask",
                                               source_docs_path="./storage/sources/uni-alt")
-qa_constructor.answer_questions(start_index=551, save_in_every_nth=10)
+
+# qa_constructor = MistralQAConstructorAdvanced(derived_questions_path="./storage/extracted_questions/qs_uni.json",
+#                                               ready_docs_path="./storage/docs/docs_2023-11-30_13-54-03.pkl",
+#                                               proxy_llm_url="http://df53-34-87-139-234.ngrok.io/ask",
+#                                               source_docs_path="./storage/sources/uni-alt")
+#qa_constructor.answer_questions(start_index=551, save_in_every_nth=10)
 

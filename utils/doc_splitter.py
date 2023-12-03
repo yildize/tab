@@ -8,7 +8,7 @@ from datetime import datetime
 
 class DocSplitter:
     """This is a utility class to convert docs into split docs."""
-    def __init__(self, docs_path:str, split_info:Tuple[Tuple[int, int],...] = ((1000, 0), (500, 100), (250, 50), (100, 0), (25, 0))):
+    def __init__(self, docs_path:str, split_info:Tuple[Tuple[int, int],...] = ((1000, 0), (500, 100), (250, 50), (100, 0))):
         """
         docs can be a path to docs or actual list of docs
         split_info is a tuple of tuples each inner tuple representing chunk_size and chunk_overlap arguments respectively.

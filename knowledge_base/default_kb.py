@@ -43,8 +43,11 @@ class DefaultKnowledgeBase(CustomKnowledgeBase):
         if self.page_docs is None: raise AttributeError("To use search_pages_with_cross_encoder page_docs argument will be provided along with chunk docs (docs).")
         # First retrieve similar chunks by regular kb search
         similar_chunk_docs = self.search(q=q, k=cross_encoder_input_k) # each doc is typically a chunk.
+
         # Now pass them to cross_encoder for finer similarity analysis. It will compare question to similar doc contents:
         scores = self.cross_encoder.predict([[q, chunk_doc.page_content] for chunk_doc in similar_chunk_docs], activation_fct=torch.nn.Sigmoid(), apply_softmax=True)
+        # Alternatively, use dist scores instead of cross-encoder scores:
+        #scores = np.array([chunk_doc.metadata["retrieval_info"]["dist"] for chunk_doc in similar_chunk_docs])
 
         # Now only top k most related docs will be selected
         sorted_indices = np.argsort(-scores) # sort in a decreasing score order.

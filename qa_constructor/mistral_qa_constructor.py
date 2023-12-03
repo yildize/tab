@@ -82,7 +82,7 @@ class MistralQAConstructor:
             ctx.update_last_message_content(entry=f"I will provide you with a 'company-specific content' and an 'employee/user question'. I want you to clearly answer the user question utilizing the provided company specific content.\n"
                                                   f"Here is the user question:\n'''{q_str}'''\n\nHere is the content:\n\n{page_content}")
             # ask for answer to llm
-            llm_answer =  self.llm.ask(context=ctx)
+            llm_answer = self.llm.ask(context=ctx)
             # parse answer
             a_str = self.__parse_answer(llm_answer)
             # construct qa pairs (question, answer, metadata)
