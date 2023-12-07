@@ -1,0 +1,66 @@
+<div class="chat-container">
+  
+    <!-- Chat Messages -->
+    <div class="messages">
+      <div *ngFor="let chatElm of chatHistory">
+
+        <div class="message user-message" *ngIf="isElmQuestion(chatElm)">
+          <img src="assets/images/user.png" alt="User Icon" class="message-icon">
+          <div class="message-content">{{ chatElm.getMessageContent() }}</div>
+        </div>
+
+        <div class="message bot-message" *ngIf="isElmAnswer(chatElm)">
+          <div class="message-content">
+            {{chatElm.getMessageContent()}}
+            <div class="actions">
+              <button class="like-button" [disabled]="isWaitingForFeedbackResponse || chatElm.isFeedbackReceived" (click)="onLike(chatElm)">
+                <i class="pi pi-thumbs-up"></i>
+              </button>
+              <button class="dislike-button" [disabled]="isWaitingForFeedbackResponse || chatElm.isFeedbackReceived" (click)="onDislike(chatElm)">
+                <i class="pi pi-thumbs-down"></i>
+              </button>
+              <button class="more-button" (click)="onMore(chatElm)">
+                <i class="pi pi-info"></i>
+              </button>
+            </div>
+            <img src="assets/images/bot.png" alt="Bot Icon" class="message-icon">
+          </div>
+        </div>
+      </div>
+      <!-- Add more messages similarly -->
+    </div>
+
+
+  <!-- Chat Input -->
+  <div class="input-container">
+    <textarea #textareaElem [(ngModel)]="userQuestionText" class="chat-input" rows="1" placeholder="Ask a question..."
+      (input)="adjustHeight($event)" (keydown.enter)="sendWithEnter($event)"></textarea>
+    <button class="send-btn" (click)="onSendQuestion()" [disabled]="isWaitingForQuestionResponse">
+      <img src="assets/images/send.png" alt="Send Icon" />
+    </button>
+  </div>
+
+</div>
+
+
+<!-- The dialog component -->
+<p-dialog header="Details" [(visible)]="displayDialog" [modal]="true" [style]="{ width: '50vw' }">
+  <div *ngIf="selectedAnswer">
+    <div><strong>Confidence:</strong> {{ selectedAnswer.similarityScore | number:'1.0-2' }}</div>
+    <div><strong>Matched Question:</strong> {{ selectedAnswer.matchedQuestion }}</div>
+    
+    <div *ngIf="selectedAnswer.source">
+      <strong>Source:</strong> {{ selectedAnswer.source }}
+    </div>
+    <div *ngIf="selectedAnswer.page !== undefined">
+      <strong>Page:</strong> {{ selectedAnswer.page }}
+    </div>
+    <div *ngIf="selectedAnswer.extra_questions">
+      <strong>Similar Questions:</strong>
+      <span *ngFor="let question of selectedAnswer.extra_questions.questions; let i=index">
+        {{ question }} - {{ selectedAnswer.extra_questions.similarities[i] | number:'1.2-2' }}
+      </span>
+    </div>
+  </div>
+  <!-- ...Add other fields similarly... -->
+</p-dialog>

@@ -1,0 +1,145 @@
+.chat-container {
+  max-width: 1000px;
+  width: 100%; /* Bu, container'ı ekrana göre ölçeklendirir, ancak max-width ile sınırlıdır. */
+  margin: 0 auto;
+  height: 100vh;
+  overflow-y: auto;
+  position: relative;
+
+  padding-bottom: 100px;
+  background-color: #ffffff00; /* Chat-container'ın arkaplan rengi app.component.css ile uyumlu olacak şekilde ayarlandı. */
+}
+
+.chat-container::before {
+  content: ''; /* Needed for the pseudo-element to take space */
+  position: absolute; /* Absolute position */
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0; /* Cover the whole parent element */
+  background-image: url('/assets/images/background.png'); /* Replace with your logo URL */
+  background-size: contain; /* Adjust as necessary. This will scale your logo to fit inside the container */
+  background-repeat: no-repeat; /* Logo should not repeat */
+  background-position: center; /* Center the logo */
+  opacity: 0.1; /* Set the desired opacity */
+  z-index: -1; /* Send this to the back, so it doesn't block your other content */
+}
+
+.input-container {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 1000px;
+  width: calc(
+    100% - 20px
+  ); /* Ekranın genişliğini alır, ancak padding nedeniyle 20px azaltılmıştır. */
+  background-color: #ffffff; /* Arkaplan rengini chat-container ile aynı yapın */
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  /*border-top: 1px solid #e4e4e4;*/
+}
+
+.messages {
+  padding: 10px;
+  overflow-y: auto;
+  height: calc(100vh - 100px);
+}
+
+.user-message {
+  justify-content: flex-start;
+}
+
+.bot-message {
+  justify-content: flex-end;
+}
+
+.message-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.message-content {
+  max-width: 60%;
+  padding: 10px;
+  border-radius: 15px;
+  margin: 0 10px;
+  word-wrap: break-word;
+  white-space: pre-line;
+}
+
+.user-message .message-content {
+  background-color: #e6f7ff;
+}
+
+.bot-message .message-content {
+  background-color: #d9d9d97d;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 20px;
+  border: 1px solid #e4e4e4;
+  margin-right: 10px;
+  resize: none; /* Kullanıcının manuel olarak yeniden boyutlandırmasını engeller */
+  overflow-y: hidden; /* Yatay kaydırma çubuğunu göster */
+  max-height: 120px; /* 5 satırdan fazla oldugunda kaydırma çubuğunu göster */
+  margin-bottom: 25px;
+}
+
+.send-btn {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  overflow: hidden; /* Bu, iconun taşmasını engeller. */
+  margin-bottom: 25px;
+}
+
+.send-btn img {
+  max-width: 100%; /* Bu, iconun buton içerisine sığmasını sağlar. */
+  max-height: 100%;
+}
+
+.bot-message .message-content {
+  position: relative;
+}
+
+.message {
+  display: flex;
+  margin: 10px;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  position: absolute; /* Make it absolute */
+  bottom: 5px; /* Adjust as per your design needs */
+  right: 5px; /* Adjust as per your design needs */
+}
+
+.actions button {
+  width: 30px; /* You can adjust this as needed */
+  height: 30px; /* Ensure this is the same as the width to keep the circle aspect */
+  border-radius: 50%; /* This makes the button circular */
+  background-color: #fffffff6; /* Set the button's background color */
+  display: flex; /* To center the icon both horizontally and vertically */
+  align-items: center; /* Vertically center the icon */
+  justify-content: center; /* Horizontally center the icon */
+  /*border: 1px solid #e4e4e4; /* Optional: to give a border to the button */
+  transition: transform 0.2s ease;
+}
+
+.actions button:hover {
+  transform: scale(1.1); /* Adjust the scale factor (1.1) to your liking */
+}
+
+.bot-message .message-content {
+  padding-bottom: 40px;
+}
