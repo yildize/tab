@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { MessageService } from 'primeng/api';
-import { Answer, Question } from './models';
+import { Answer, Question, RAGAnswer, RAGResponse, MetaData, Metadata } from './models';
 
 @Component({
   selector: 'app-chat',
@@ -12,10 +12,11 @@ import { Answer, Question } from './models';
 export class ChatComponent implements OnInit {
   @ViewChild('textareaElem') textAreaElement!: ElementRef;
 
-  chatHistory: (Question | Answer)[] = [];
+  chatHistory: (Question | Answer | RAGAnswer)[] = [];
   userQuestionText: string = '';
   isWaitingForQuestionResponse: boolean = false;
   isWaitingForFeedbackResponse: boolean = false;
+  isWaitingForRAGResponse: boolean = false;
   selectedAnswer: any;
   displayDialog: boolean = false;
   questionAPIURL = environment.apiRootUrl + '/question';
@@ -45,6 +46,11 @@ export class ChatComponent implements OnInit {
     this.pushToChatHistory(q);
     this.askQuestionToAPI(q);
   }
+  onSimilarQuestionClick(q:string){
+    this.userQuestionText = q
+    this.onSendQuestion()
+    this.displayDialog = false;
+  }
 
   askQuestionToAPI(q: Question) {
     this.http
@@ -69,7 +75,7 @@ export class ChatComponent implements OnInit {
       });
   }
 
-  pushToChatHistory(elm: Question | Answer) {
+  pushToChatHistory(elm: Question | Answer | RAGAnswer) {
     if (elm instanceof Question) {
       this.chatHistory.push(elm);
       // After a new user question is pushed to the history we,
@@ -84,9 +90,15 @@ export class ChatComponent implements OnInit {
       this.chatHistory.push(elm);
       this.isWaitingForQuestionResponse = false;
     }
+    if (elm instanceof RAGAnswer){
+      if (elm.chatHistoryAddIndex !== 0){
+        this.chatHistory.splice(elm.chatHistoryAddIndex, 0, elm);
+      }
+      this.isWaitingForRAGResponse = true;
+    }
   }
 
-  onLike(answer: Answer | Question) {
+  onLike(answer: Answer | Question | RAGAnswer) {
     if (this.isWaitingForFeedbackResponse) return;
     this.isWaitingForFeedbackResponse = true;
 
@@ -103,13 +115,13 @@ export class ChatComponent implements OnInit {
         },
         error: (error) => {
           this.errorToast(error.status);
-          answer.isFeedbackReceived = true;
+          answer.isFeedbackReceived = false;
           this.isWaitingForFeedbackResponse = false;
         },
       });
   }
 
-  onDislike(answer: Answer | Question) {
+  onDislike(answer: Answer | Question | RAGAnswer) {
     if (this.isWaitingForFeedbackResponse) return;
     this.isWaitingForFeedbackResponse = true;
 
@@ -126,13 +138,13 @@ export class ChatComponent implements OnInit {
         },
         error: (error) => {
           this.errorToast(error.status);
-          answer.isFeedbackReceived = true;
+          answer.isFeedbackReceived = false;
           this.isWaitingForFeedbackResponse = false;
         },
       });
   }
 
-  onMore(answer: Answer | Question) {
+  onMore(answer: Answer | Question | RAGAnswer) {
     if (answer instanceof Answer) {
       this.selectedAnswer = {
         similarityScore: answer.similarity,
@@ -144,7 +156,67 @@ export class ChatComponent implements OnInit {
       }
       this.displayDialog = true;
     }
+
+    if (answer instanceof RAGAnswer) {
+      this.selectedAnswer = {
+        sourcesAndPages: answer.meta_data.map(item => ({ source_name: item.source_name, page: item.page })),
+        time_tag: answer.time_tag,
+      }
+      this.displayDialog = true;
+    }
   }
+
+  onRAG(answer: Answer | Question | RAGAnswer) {
+    if (answer instanceof Answer) {
+      answer.ragButtonPressed = true
+
+
+      // create a dummy answer with loading animation
+      let dummy_rag_answer: RAGAnswer = new RAGAnswer(answer.sender, answer.user_question, this.currentDate,
+              "",  [{"source_name":"filler", page:0}]
+      );
+      const answerIndex = this.chatHistory.findIndex(element => element === answer);
+      dummy_rag_answer.chatHistoryAddIndex = answerIndex+1
+      this.pushToChatHistory(dummy_rag_answer)
+      
+
+      // Mimic the RAG request-response here
+      setTimeout(() => {
+        let dummy_response = {"answer":"Example RAG answer.", "metadata":[{"source":"source1.pdf", "page":0, "doc_index":111},
+                                                                          {"source":"source2.pdf", "page":1, "doc_index":111},
+                                                                          {"source":"source3.pdf", "page":2, "doc_index":111},
+                                                                          {"source":"source4.pdf", "page":3, "doc_index":111},
+                                                                          {"source":"source5.pdf", "page":4, "doc_index":111}
+        ]}
+
+      const [a, m] = this.extractRAGResponse(dummy_response)
+      dummy_rag_answer.answer = a;
+      dummy_rag_answer.meta_data = m
+
+      this.isWaitingForRAGResponse = false;
+      }, 10000);
+
+      // send a request to RAG API
+      // parse the response
+      // update the dummy answer content
+
+    }
+  }
+
+  extractRAGResponse(response:RAGResponse): [string, MetaData[]]{
+    // Extract the answer directly
+    const answer = response.answer;
+    const metaDataList: MetaData[] = this.convertMetadata(response.metadata);
+    return [answer, metaDataList]
+  }
+
+  convertMetadata(metadataArray: Metadata[]): MetaData[] {
+    return metadataArray.map((item): MetaData => ({
+      source_name: item.source,
+      page: item.page
+    }));
+  }
+
 
   responseToAnswer(response: any): Answer {
     return new Answer( response.sender, response.user_question, response.time_tag,
@@ -194,12 +266,23 @@ export class ChatComponent implements OnInit {
     chatContainer.style.paddingBottom = inputContainerHeight + 'px';
   }
 
-  isElmQuestion(elm: Question | Answer) {
+  isElmQuestion(elm: Question | Answer | RAGAnswer) {
     return elm instanceof Question;
   }
 
-  isElmAnswer(elm: Question | Answer) {
+  isElmAnswer(elm: Question | Answer | RAGAnswer) {
     return elm instanceof Answer;
+  }
+
+  isElmRAGAnswer(elm: Question | Answer | RAGAnswer) {
+    return elm instanceof RAGAnswer;
+  }
+
+  isRAGButtonPressed(elm: Question | Answer | RAGAnswer) {
+    if (elm instanceof Answer){
+      return elm.ragButtonPressed
+    }
+    return false
   }
 
 }

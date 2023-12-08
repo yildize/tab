@@ -76,6 +76,9 @@
 
 .bot-message .message-content {
   background-color: #d9d9d97d;
+  min-width: 175px;
+  position: relative;
+  padding-bottom: 40px;
 }
 
 .chat-input {
@@ -107,10 +110,6 @@
   max-height: 100%;
 }
 
-.bot-message .message-content {
-  position: relative;
-}
-
 .message {
   display: flex;
   margin: 10px;
@@ -140,6 +139,51 @@
   transform: scale(1.1); /* Adjust the scale factor (1.1) to your liking */
 }
 
-.bot-message .message-content {
-  padding-bottom: 40px;
+
+.typing-dots {
+  margin: 0 auto;
+  width: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.typing-dots span {
+  width: 5px;
+  height: 5px;
+  background-color: #333;
+  border-radius: 50%;
+  animation: typing 0.5s infinite alternate;
+}
+
+@keyframes typing {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-5px);
+  }
+}
+
+
+.bot-message .message-content .typing-dots {
+  position: absolute;
+  bottom: 18px; /* Start with 0 to ensure visibility */
+  left: 15px; /* Start with 0 to ensure visibility */
+  z-index: 1; /* Ensure it's above the message-content but below the actions */
+  /* ... other styles ... */
+}
+
+
+.clickable-question {
+  cursor: pointer;
+  color: #007BFF; /* Bootstrap's default blue for links */
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.clickable-question:hover {
+  background-color: #007BFF; /* Background color on hover */
+  color: white; /* Text color on hover */
+  text-decoration: none; /* Removes underline */
 }

@@ -9,23 +9,36 @@
           <div class="message-content">{{ chatElm.getMessageContent() }}</div>
         </div>
 
-        <div class="message bot-message" *ngIf="isElmAnswer(chatElm)">
+        <div class="message bot-message" *ngIf="isElmAnswer(chatElm) || isElmRAGAnswer(chatElm)">
           <div class="message-content">
-            {{chatElm.getMessageContent()}}
+            <span *ngIf="chatElm.getMessageContent(); else loading">
+              {{chatElm.getMessageContent()}}
+            </span>
+            <ng-template #loading>
+              <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </ng-template>
             <div class="actions">
-              <button class="like-button" [disabled]="isWaitingForFeedbackResponse || chatElm.isFeedbackReceived" (click)="onLike(chatElm)">
+              <button class="like-button" [disabled]="isWaitingForFeedbackResponse || chatElm.isFeedbackReceived || (isElmRAGAnswer(chatElm) && !chatElm.getMessageContent())" (click)="onLike(chatElm)">
                 <i class="pi pi-thumbs-up"></i>
               </button>
-              <button class="dislike-button" [disabled]="isWaitingForFeedbackResponse || chatElm.isFeedbackReceived" (click)="onDislike(chatElm)">
+              <button class="dislike-button" [disabled]="isWaitingForFeedbackResponse || chatElm.isFeedbackReceived || (isElmRAGAnswer(chatElm) && !chatElm.getMessageContent())" (click)="onDislike(chatElm)">
                 <i class="pi pi-thumbs-down"></i>
               </button>
-              <button class="more-button" (click)="onMore(chatElm)">
+              <button class="more-button" (click)="onMore(chatElm)" [disabled]="isElmRAGAnswer(chatElm) && !chatElm.getMessageContent()">
                 <i class="pi pi-info"></i>
               </button>
+              <button class="rag-button" *ngIf="!isElmRAGAnswer(chatElm)"  [disabled]="isRAGButtonPressed(chatElm) || isWaitingForRAGResponse" (click)="onRAG(chatElm)">
+                <i class="pi pi-angle-right"></i>
+              </button>
             </div>
-            <img src="assets/images/bot.png" alt="Bot Icon" class="message-icon">
           </div>
+          <img src="assets/images/bot.png" alt="Bot Icon" class="message-icon">
         </div>
+
       </div>
       <!-- Add more messages similarly -->
     </div>
@@ -46,8 +59,9 @@
 <!-- The dialog component -->
 <p-dialog header="Details" [(visible)]="displayDialog" [modal]="true" [style]="{ width: '50vw' }">
   <div *ngIf="selectedAnswer">
-    <div><strong>Confidence:</strong> {{ selectedAnswer.similarityScore | number:'1.0-2' }}</div>
-    <div><strong>Matched Question:</strong> {{ selectedAnswer.matchedQuestion }}</div>
+    <!-- Regular Answer -->
+    <div *ngIf="selectedAnswer.similarityScore"><strong>Confidence:</strong> {{ selectedAnswer.similarityScore | number:'1.0-2' }}</div>
+    <div *ngIf="selectedAnswer.matchedQuestion"><strong>Matched Question:</strong> {{ selectedAnswer.matchedQuestion }}</div>
     
     <div *ngIf="selectedAnswer.source">
       <strong>Source:</strong> {{ selectedAnswer.source }}
@@ -57,9 +71,16 @@
     </div>
     <div *ngIf="selectedAnswer.extra_questions">
       <strong>Similar Questions:</strong>
-      <span *ngFor="let question of selectedAnswer.extra_questions.questions; let i=index">
-        {{ question }} - {{ selectedAnswer.extra_questions.similarities[i] | number:'1.2-2' }}
-      </span>
+      <div *ngFor="let question of selectedAnswer.extra_questions.questions; let i=index">
+        <span class="clickable-question" (click)="onSimilarQuestionClick(question)">[{{ selectedAnswer.extra_questions.similarities[i] | number:'1.2-2' }}] {{ question }}</span>
+      </div>
+    </div>
+    <!-- RAG Answer -->
+    <p *ngIf="selectedAnswer.sourcesAndPages"><strong>Utilized Sources for the Answer</strong></p>
+    <div *ngIf="selectedAnswer.sourcesAndPages">
+      <div *ngFor="let item of selectedAnswer.sourcesAndPages">
+        <span><strong>Source:</strong> {{ item.source_name }} - <strong>Page:</strong> {{ item.page }}</span>
+      </div>
     </div>
   </div>
   <!-- ...Add other fields similarly... -->
