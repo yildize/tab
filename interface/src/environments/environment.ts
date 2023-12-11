@@ -5,7 +5,8 @@
 export const environment = {
   production: false,
   doNotRespondConfidenceThreshold: 0.6,
-  apiRootUrl: "http://127.0.0.1:5000/api"
+  apiRootUrl: "http://127.0.0.1:5000",
+  apiRAGUrl: "http://127.0.0.1:5005"
 };
 
 /*

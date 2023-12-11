@@ -10,6 +10,15 @@ class KBQuery:
     cross_encoder_input_k: Optional[int] = None
 
 
+class QuestionSchema(Schema):
+    user_question = fields.Str(required=True)
+    k = fields.Int()
+    sender = fields.Str()
+    time_tag = fields.DateTime()
+
+question_schema = QuestionSchema()
+
+
 class KBQuerySchema(Schema):
     content = fields.Str(required=True, error_messages={'required': 'content field is required.'})
     k = fields.Int(error_messages={'validator_failed': 'k field must be an integer.'})

@@ -1,4 +1,5 @@
 import os
+import copy
 from knowledge_base.knowledge_base import CustomKnowledgeBase
 from typing import Union, List, Optional, Dict, Tuple
 from utils.protocols import Doc
@@ -31,7 +32,7 @@ class DefaultKnowledgeBase(CustomKnowledgeBase):
         res_docs = []
         for index, dist in zip(indices[0], distances[0]):
             # Deep copy to provide thread safety for multi-threadded usages.
-            similar_doc = self.docs[index].copy(deep=True) # use copy.deepcopy(self.docs[index]) if it throws an error.
+            similar_doc = self.docs[index].copy(deep=True) if hasattr(self.docs[index], "copy") else copy.deepcopy(self.docs[index])
             similar_doc.metadata["retrieval_info"] = {"q": q, "dist": dist, "token_len": self.embedder.len_required_tokens(similar_doc.page_content)}
             res_docs.append(similar_doc)
         return res_docs
@@ -61,7 +62,7 @@ class DefaultKnowledgeBase(CustomKnowledgeBase):
         # Now extract and deep copy those most similar page-docs to thread-safely modify them:
         related_page_docs = []
         for doc_index, scores in page_docs_indexes.items():
-            page_doc = self.page_docs[doc_index].copy(deep=True)
+            page_doc = self.page_docs[doc_index].copy(deep=True) if hasattr(self.page_docs[doc_index], "copy") else copy.deepcopy(self.page_docs[doc_index])
             page_doc.metadata["retrieval_info"] = {"q": q, "dist": scores[1], "cross_encoder_score":scores[0]} # I kept the key as dist even though it is not exactly a distance measure just too keep it compatible.
             related_page_docs.append(page_doc)
 

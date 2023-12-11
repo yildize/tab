@@ -27,17 +27,25 @@ class RAGAdvanced:
     def __combine_page_contents(self, related_page_docs: List[Doc]) -> str:
         pages_content = ""
         for i, page_doc in enumerate(related_page_docs):
-            pages_content += f"Content {i + 1}: [{page_doc.page_content}]\n"
+            pages_content += f"Content {i + 1}: [{page_doc.page_content}]\n\n"
         return pages_content
 
     def __construct_mistral_context(self, q_str:str, page_contents:str):
+
         ctx = MistralContext()
-        ctx.add_user_message("Hello, who are you?")
-        ctx.add_assistant_message("Hello there! I am TAB an helpful Information Managament Assistant Bot. My job is to correctly give clear and concise answers to your questions based on provided contents.")
-        ctx.add_user_message("Great! I have a question and some page contents. Can you answer my questions utilizing the contents I will be providing?")
-        ctx.add_assistant_message("Of course, with pleasure. Please give me your question and the contents.")
-        ctx.add_user_message(f"Here is the user question: [{q_str}]\nHere is your contents:\n{page_contents}\n\n"
+        ctx.add_user_message("Your name is TAB, you are an helpful Information Managament Assistant Bot. Your job is to correctly give clear and concise answers to user question based on provided contents.")
+        ctx.add_assistant_message("I understand. My name is TAB. I will give a clear and concise answer to provided user question utilizing the provided contents.")
+        ctx.add_user_message(f"Please answer the following user question:[{q_str}]\nutilizing following contents:\n{page_contents}\n\n"
                              f"If the answer is not found among the contents, ONLY answer: Sorry I could not find the answer in my knowledge base.")
+        # ctx = MistralContext()
+        # ctx.add_user_message("Hello, who are you?")
+        # ctx.add_assistant_message("Hello there! I am TAB an helpful Information Managament Assistant Bot. My job is to correctly give clear and concise answers to your questions based on provided contents.")
+        # ctx.add_user_message("Great! I have a question and some page contents. Can you answer my questions utilizing the contents I will be providing?")
+        # ctx.add_assistant_message("Of course, with pleasure. Please give me your question and the contents.")
+        # ctx.add_user_message(f"Here is the user question: [{q_str}]\nHere is your contents:\n{page_contents}\n\n"
+        #                      f"If the answer is not found among the contents, ONLY answer: Sorry I could not find the answer in my knowledge base.")
+
+
         # ctx.add_user_message(entry=f"Assume, you are an helpful Information Management Assistant for Hacettepe University Computer Engineering Department. "
         #           #f"Your job is to help students by answering their questions utilizing provided page contents."
         #           f"I want you to give a clear and concise answer to the student question utilizing the provided contents.\n\n"

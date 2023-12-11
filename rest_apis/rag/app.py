@@ -12,7 +12,7 @@ import inspect
 import json
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route('/')
 def index():
@@ -36,8 +36,8 @@ if __name__ == '__main__':
     # To run from terminal, position to the project root and then: python -m rest_apis.knowledge_base.app -- args
     args = parser.parse_args()
 
-    args.llm_endpoint_url = "http://a7fa-34-80-134-151.ngrok-free.app/ask"
-    args.base_kb_endpoint_url = "127.0.0.1:5000"
+    args.llm_endpoint_url = "http://b837-35-231-87-216.ngrok-free.app/ask"
+    args.base_kb_endpoint_url = "127.0.0.1:5001"
 
     rag = RAGAdvanced(llm=ProxyMistralLLM(endpoint_url=args.llm_endpoint_url), kb=ProxyKnowledgeBase(base_endpoint_url=args.base_kb_endpoint_url), search_pages=args.rag_type=="search_pages")
 

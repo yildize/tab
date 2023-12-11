@@ -21,6 +21,7 @@ export class ChatComponent implements OnInit {
   displayDialog: boolean = false;
   questionAPIURL = environment.apiRootUrl + '/question';
   feedbackAPIURL = environment.apiRootUrl + '/feedback';
+  ragAPIURL = environment.apiRAGUrl + '/ask';
   doNotRespondConfidenceThreshold = environment.doNotRespondConfidenceThreshold;
 
   constructor(
@@ -173,7 +174,7 @@ export class ChatComponent implements OnInit {
 
       // create a dummy answer with loading animation
       let dummy_rag_answer: RAGAnswer = new RAGAnswer(answer.sender, answer.user_question, this.currentDate,
-              "",  [{"source_name":"filler", page:0}]
+              "",  [{"source_name":"error occured", page:0}]
       );
       const answerIndex = this.chatHistory.findIndex(element => element === answer);
       dummy_rag_answer.chatHistoryAddIndex = answerIndex+1
@@ -181,6 +182,7 @@ export class ChatComponent implements OnInit {
       
 
       // Mimic the RAG request-response here
+      /*
       setTimeout(() => {
         let dummy_response = {"answer":"Example RAG answer.", "metadata":[{"source":"source1.pdf", "page":0, "doc_index":111},
                                                                           {"source":"source2.pdf", "page":1, "doc_index":111},
@@ -195,6 +197,32 @@ export class ChatComponent implements OnInit {
 
       this.isWaitingForRAGResponse = false;
       }, 10000);
+      */
+
+      this.http
+      .post(this.ragAPIURL, {"question":answer.user_question})
+      .subscribe({
+        next: (response: any) => {
+          console.log(response);
+          const [a, m] = this.extractRAGResponse(response)
+          dummy_rag_answer.answer = a;
+          dummy_rag_answer.meta_data = m
+          this.isWaitingForRAGResponse = false;
+        },
+        error: (error) => {
+          this.errorToast(error.status);
+          dummy_rag_answer.answer = "An error occured.";
+          this.isWaitingForRAGResponse = false;
+
+          /*let answer: Answer = new Answer( "sender", "user_question", "time_tag",
+            "This is the answer", {"questions":["q1", "q2"], "similarities":[0.2,0.4]}, "those are matched questions",
+            {"source_name":"a source", page:7}, 0.7, 3
+          );
+          this.pushToChatHistory(answer)*/
+
+        },
+      });
+      
 
       // send a request to RAG API
       // parse the response
@@ -212,9 +240,14 @@ export class ChatComponent implements OnInit {
 
   convertMetadata(metadataArray: Metadata[]): MetaData[] {
     return metadataArray.map((item): MetaData => ({
-      source_name: item.source,
+      source_name: this.getFileName(item.source),
       page: item.page
     }));
+  }
+
+  getFileName(fullFileName:string){
+    let parts = fullFileName.split('\\');
+    return parts[parts.length - 1];
   }
 
 

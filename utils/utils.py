@@ -5,7 +5,7 @@ import json
 from utils.protocols import Doc
 from dataclasses import dataclass
 from typing import List
-
+import sys
 
 def root_path():
     project_name = "tab"
@@ -19,6 +19,8 @@ def root_path():
 
 
 ROOT_PATH = root_path()
+
+# sys.path.insert(0, ROOT_PATH)
 
 
 def load_docs(docs_path: str):

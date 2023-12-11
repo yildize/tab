@@ -52,7 +52,7 @@ class SetenceTransformerEmbedder(Embedder):
         super().__init__(embedder_name=embedder_name)
 
     def _construct_embedder(self, embedder_name:str) -> Union[SentenceTransformer, OpenAIEmbeddings]:
-        return SentenceTransformer(embedder_name, cache_folder=os.path.join(ROOT_PATH, "storage", "sentence-transformers"))
+        return SentenceTransformer(embedder_name, cache_folder=os.path.join(ROOT_PATH, "storage", "sentence-transformers")) # todo: DEVICE!!!
 
     @property
     def max_seq_length(self)->int:

@@ -7,7 +7,7 @@ export class Question {
     }
     
     get askData(){
-      return {sender: this.sender, user_question:this.user_question, time_tag:this.time_tag}
+      return {sender:this.sender, user_question:this.user_question, time_tag:this.time_tag}
     }
   }
   

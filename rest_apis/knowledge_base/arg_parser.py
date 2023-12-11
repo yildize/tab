@@ -21,4 +21,4 @@ parser.add_argument('--embedder_name', type=str, default="all-mpnet-base-v2", he
 # Optional Cross-Encoder name
 parser.add_argument('--cross_encoder_name', type=str, default=None, help='Optional cross encoder name') # cross-encoder/ms-marco-MiniLM-L-6-v2
 # Optional Page Docs path Specifically used for Cross-Encoder search:
-parser.add_argument('--page_docs_path', type=str, default='./storage/docs/page_doc.pkl', help='Optional page doc name specifically used with cross-encoder search')
+parser.add_argument('--page_docs_path', type=str, default=None, help='Optional page doc name specifically used with cross-encoder search') # "./storage/docs/page_doc.pkl"
