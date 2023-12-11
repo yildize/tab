@@ -19,9 +19,9 @@ export class ChatComponent implements OnInit {
   isWaitingForRAGResponse: boolean = false;
   selectedAnswer: any;
   displayDialog: boolean = false;
-  questionAPIURL = environment.apiRootUrl + '/question';
-  feedbackAPIURL = environment.apiRootUrl + '/feedback';
-  ragAPIURL = environment.apiRAGUrl + '/ask';
+  questionAPIURL = environment.questionAPIURL + '/question';
+  feedbackAPIURL = environment.feedbackAPIURL + '/feedback';
+  ragAPIURL = environment.ragAPIURL + '/ask';
   doNotRespondConfidenceThreshold = environment.doNotRespondConfidenceThreshold;
 
   constructor(
@@ -58,20 +58,12 @@ export class ChatComponent implements OnInit {
       .post(this.questionAPIURL, q.askData)
       .subscribe({
         next: (response: any) => {
-          console.log(response);
           let answer: Answer = this.responseToAnswer(response);
           this.pushToChatHistory(answer);
         },
         error: (error) => {
           this.errorToast(error.status);
           this.isWaitingForQuestionResponse = false;
-
-          /*let answer: Answer = new Answer( "sender", "user_question", "time_tag",
-            "This is the answer", {"questions":["q1", "q2"], "similarities":[0.2,0.4]}, "those are matched questions",
-            {"source_name":"a source", page:7}, 0.7, 3
-          );
-          this.pushToChatHistory(answer)*/
-
         },
       });
   }
@@ -179,31 +171,12 @@ export class ChatComponent implements OnInit {
       const answerIndex = this.chatHistory.findIndex(element => element === answer);
       dummy_rag_answer.chatHistoryAddIndex = answerIndex+1
       this.pushToChatHistory(dummy_rag_answer)
-      
-
-      // Mimic the RAG request-response here
-      /*
-      setTimeout(() => {
-        let dummy_response = {"answer":"Example RAG answer.", "metadata":[{"source":"source1.pdf", "page":0, "doc_index":111},
-                                                                          {"source":"source2.pdf", "page":1, "doc_index":111},
-                                                                          {"source":"source3.pdf", "page":2, "doc_index":111},
-                                                                          {"source":"source4.pdf", "page":3, "doc_index":111},
-                                                                          {"source":"source5.pdf", "page":4, "doc_index":111}
-        ]}
-
-      const [a, m] = this.extractRAGResponse(dummy_response)
-      dummy_rag_answer.answer = a;
-      dummy_rag_answer.meta_data = m
-
-      this.isWaitingForRAGResponse = false;
-      }, 10000);
-      */
+    
 
       this.http
       .post(this.ragAPIURL, {"question":answer.user_question})
       .subscribe({
         next: (response: any) => {
-          console.log(response);
           const [a, m] = this.extractRAGResponse(response)
           dummy_rag_answer.answer = a;
           dummy_rag_answer.meta_data = m
@@ -213,20 +186,8 @@ export class ChatComponent implements OnInit {
           this.errorToast(error.status);
           dummy_rag_answer.answer = "An error occured.";
           this.isWaitingForRAGResponse = false;
-
-          /*let answer: Answer = new Answer( "sender", "user_question", "time_tag",
-            "This is the answer", {"questions":["q1", "q2"], "similarities":[0.2,0.4]}, "those are matched questions",
-            {"source_name":"a source", page:7}, 0.7, 3
-          );
-          this.pushToChatHistory(answer)*/
-
         },
       });
-      
-
-      // send a request to RAG API
-      // parse the response
-      // update the dummy answer content
 
     }
   }

@@ -5,8 +5,9 @@
 export const environment = {
   production: false,
   doNotRespondConfidenceThreshold: 0.6,
-  apiRootUrl: "http://127.0.0.1:5000",
-  apiRAGUrl: "http://127.0.0.1:5005"
+  questionAPIURL: "http://127.0.0.1:5000",
+  feedbackAPIURL: "http://127.0.0.1:5010",
+  ragAPIURL: "http://127.0.0.1:5005"
 };
 
 /*
