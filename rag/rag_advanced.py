@@ -15,7 +15,7 @@ class RAGAdvanced:
         self._llm = llm
         self._kb = kb
         self._search_pages = search_pages
-    def ask(self, question:str, k=5, cross_encoder_input_k=50):
+    def ask(self, question:str, k=5, cross_encoder_input_k=100):
         """ If search pages is True, k is used as max_k for cross encoder"""
         related_page_docs = self._kb.search_pages_with_cross_encoder(q=question, max_k=k, cross_encoder_input_k=cross_encoder_input_k) if self._search_pages else self._kb.search(q=question, k=k)
         page_contents_str = self.__combine_page_contents(related_page_docs=related_page_docs)
@@ -27,7 +27,8 @@ class RAGAdvanced:
     def __combine_page_contents(self, related_page_docs: List[Doc]) -> str:
         pages_content = ""
         for i, page_doc in enumerate(related_page_docs):
-            pages_content += f"Content {i + 1}: [{page_doc.page_content}]\n\n"
+            #pages_content += f"Page {i + 1}: '''{page_doc.page_content}'''\n\n"
+            pages_content += f"--- Page {i + 1} Content ---\n{page_doc.page_content}\n\n"
         return pages_content
 
     def __construct_mistral_context(self, q_str:str, page_contents:str):
@@ -38,26 +39,35 @@ class RAGAdvanced:
         # ctx.add_user_message(f"Please answer the following user question:[{q_str}]\nutilizing following contents:\n{page_contents}\n\n"
         #                      f"If the answer is not found among the contents, ONLY answer: Sorry I could not find the answer in my knowledge base.")
 
-        ctx = MistralContext()
-        ctx.add_user_message("Hello, who are you?")
-        ctx.add_assistant_message("Hello there! I am TAB an helpful Information Managament Assistant Bot. My job is to correctly give clear and concise answers to your questions based on provided contents.")
-        ctx.add_user_message("Great! I have a question and some page contents. Can you answer my questions utilizing the contents I will be providing?")
-        ctx.add_assistant_message("Of course, with pleasure. Please give me your question and the contents.")
-        ctx.add_user_message(f"Here is the user question: [{q_str}]\nHere is your contents:\n{page_contents}\n\n"
-                             f"If the answer is not found among the contents, ONLY answer: Sorry I could not find the answer in my knowledge base.")
+        # ctx = MistralContext()
+        # ctx.add_user_message("Hello, who are you?")
+        # ctx.add_assistant_message("Hello there! I am TAB an helpful Information Managament Assistant Bot. My job is to correctly give clear and concise answers to your questions based on provided contents.")
+        # ctx.add_user_message("Great! I have a question and some page contents. Can you answer my questions utilizing the contents I will be providing?")
+        # ctx.add_assistant_message("Of course, with pleasure. Please give me your question and the contents.")
+        # ctx.add_user_message(f"Here is the user question: [{q_str}]\nHere is your contents:\n{page_contents}\n\n"
+        #                      f"If the answer is not found among the contents, ONLY answer: Sorry I could not find the answer in my knowledge base.")
 
-
-        # ctx.add_user_message(entry=f"Assume, you are an helpful Information Management Assistant for Hacettepe University Computer Engineering Department. "
+        # ctx = MistralContext()
+        # ctx.add_user_message(entry=f"Assume, you are a kind and helpful assistant."
         #           #f"Your job is to help students by answering their questions utilizing provided page contents."
-        #           f"I want you to give a clear and concise answer to the student question utilizing the provided contents.\n\n"
-        #           f"Here is the user question:\n[{q_str}]'''\n\nHere is your contents:\n\n[{page_contents}]\n\n"
+        #           f"I want you to give a clear, concise and correct answer to the question according to provided page contents. The question might "
+        #           f"require you to use only a specific part of the page contents as well as utilize multiple page contents.\n\n"
+        #           f"Here is the question:\n[{q_str}]\n\nHere is your page contents:\n{page_contents}\n\n"
         #           f"If the answer is not found among the contents, ONLY answer: Sorry I could not find the answer in my knowledge base.")
+
+        ctx = MistralContext()
+        ctx.add_user_message(entry=f"Assume you are a knowledgeable and resourceful assistant. Your task is to provide a clear, concise, "
+                                   f"and accurate answer to the following question by utilizing the provided page contents. The answer may "
+                                   f"be found in a specific part of a page, or it may require synthesizing information from multiple pages.\n\n"
+                                   f"Question:\n[{q_str}]\n\n"
+                                   f"Provided Page Contents:\n\n{page_contents}"
+                                   f"Please answer the question using the relevant information from the above page contents.")
         return ctx
 
 
 if __name__ == "__main__":
     llm = ProxyMistralLLM(endpoint_url="http://a7fa-34-80-134-151.ngrok-free.app/ask")
-    kb = ProxyKnowledgeBase(base_endpoint_url="127.0.0.1:5000")
+    kb = ProxyKnowledgeBase(base_endpoint_url="127.0.0.1:5001")
     rag = RAGAdvanced(llm=llm, kb=kb)
-    answer, metadata = rag.ask(question="Contact information of Cemil Zalluhoglu?", k=8, cross_encoder_input_k=100)
+    answer, metadata = rag.ask(question="Contact information of Cemil ZALLUHOĞLU?", k=5, cross_encoder_input_k=20)
     print()

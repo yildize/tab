@@ -37,7 +37,7 @@ class DefaultKnowledgeBase(CustomKnowledgeBase):
             res_docs.append(similar_doc)
         return res_docs
 
-    def search_pages_with_cross_encoder(self, q, max_k=5, cross_encoder_input_k=20) -> List[Doc]:
+    def search_pages_with_cross_encoder(self, q, max_k=5, cross_encoder_input_k=100) -> List[Doc]:
         """ Note that for this search method, the number of the return documents can be lower than
         max_k when multiple chunks are from the same page. Also note that this method relies on
         docs having doc_index field inside their metadata."""
