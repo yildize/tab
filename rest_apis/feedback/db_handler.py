@@ -19,8 +19,9 @@ class DBHandler:
                 matched_question TEXT,
                 matched_answer TEXT,
                 suggested_answer TEXT,
-                rag_answer TEXT
-            )""")  # Added rag_answer TEXT
+                rag_answer TEXT,
+                sources TEXT
+            )""")
 
     @property
     def db_connection(self):
@@ -32,13 +33,13 @@ class DBHandler:
             cursor.execute("SELECT * FROM feedback")
             return cursor.fetchall()
 
-    def insert_feedback(self, is_rag, is_liked, user_question, matched_question=None, matched_answer=None, suggested_answer=None, rag_answer=None):
+    def insert_feedback(self, is_rag, is_liked, user_question, matched_question=None, matched_answer=None, suggested_answer=None, rag_answer=None, sources=None):
         with self.db_connection as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO feedback (is_rag, is_liked, user_question, matched_question, matched_answer, suggested_answer, rag_answer)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                """, (is_rag, is_liked, user_question, matched_question, matched_answer, suggested_answer, rag_answer))
+                INSERT INTO feedback (is_rag, is_liked, user_question, matched_question, matched_answer, suggested_answer, rag_answer, sources)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, (is_rag, is_liked, user_question, matched_question, matched_answer, suggested_answer, rag_answer, sources))
             conn.commit()
 
 

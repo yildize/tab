@@ -16,7 +16,7 @@ def ask():
     answer_feedback = AnswerFeedback(**answer_feedback_schema.load(request_data))
     db_handler.insert_feedback(is_rag=answer_feedback.is_rag, is_liked=answer_feedback.is_liked, user_question=answer_feedback.user_question,
                                matched_question=answer_feedback.matched_question, matched_answer=answer_feedback.matched_answer,
-                               suggested_answer=answer_feedback.suggested_answer, rag_answer=answer_feedback.rag_answer)
+                               suggested_answer=answer_feedback.suggested_answer, rag_answer=answer_feedback.rag_answer, sources=answer_feedback.sources)
     return jsonify({"storage_successful":True})
 
 @app.errorhandler(ValidationError)

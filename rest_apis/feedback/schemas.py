@@ -14,6 +14,7 @@ class AnswerFeedback:
     suggested_answer: Optional[str] = None
 
     rag_answer: Optional[str] = None
+    sources: Optional[str] = None
 
 
 class AnswerFeedbackSchema(Schema):
@@ -27,12 +28,15 @@ class AnswerFeedbackSchema(Schema):
     suggested_answer = fields.Str()
 
     rag_answer = fields.Str()
+    sources = fields.Str()
 
     @validates_schema
     def validate_feedback_type(self, data, **kwargs):
         if data.get('is_rag'):
             if data.get('rag_answer') is None:
                 raise ValidationError('rag_answer is required for rag feedbacks')
+            if data.get('sources') is None:
+                raise ValidationError('sources is required for rag feedbacks')
         else:
             if data.get('matched_question') is None:
                 raise ValidationError('matched_question is required for non-rag feedbacks')

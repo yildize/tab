@@ -44,7 +44,7 @@ export class Question {
     }
     
     get feedbackData(){
-      return {is_rag: true, is_liked:this.isLiked, user_question:this.user_question, rag_answer:this.answer, suggested_answer:this.suggested_answer}
+      return {is_rag: true, is_liked:this.isLiked, user_question:this.user_question, rag_answer:this.answer, suggested_answer:this.suggested_answer, sources:this.meta_data.map(data => `${data.source_name} [${data.page}]`).join(', ')}
     }
   }
   
