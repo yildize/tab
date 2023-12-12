@@ -38,7 +38,6 @@ def question():
     most_related_doc = docs_dumped[0]
     # {page_content:str, metadata:{source:str, page:int, retrieval_info:{q:str, dist:float, ...}, answer:str, page_summary:str, ...}}
 
-    print(most_related_doc["metadata"])
     request_data["answer"] = most_related_doc["metadata"]["answer"]
     request_data["matched_question"] = most_related_doc["page_content"] # chunk content should correspond to question since kb serves the question chunks.
     request_data["similarity"] = most_related_doc["metadata"]["retrieval_info"]["dist"]
@@ -82,12 +81,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Setup for json qas constructed page by page. Suitable to previous approach. Pay attention to default sentence transformer.
-    # args.source_type = "qa_docs"
-    # args.source_path = "./storage/extracted_questions/qas_tai_cleaned.json"
+    #args.source_type = "qa_docs"
+    #args.source_path = "./storage/extracted_questions/uni-final-qas/uni-qas_cleaned.json"
 
     # Setup for cross-encoder search
     args.source_type = "docs"
-    #args.embedder_name = "msmarco-MiniLM-L-6-v3"
+    ##args.embedder_name = "msmarco-MiniLM-L-6-v3"
     args.source_path = "./storage/docs/uni-ntn-summarized-split.pkl"  # path of split chunks
     args.cross_encoder_name = "cross-encoder/ms-marco-MiniLM-L-6-v2"
     args.page_docs_path = "./storage/docs/uni-ntn-summarized-pages.pkl"  # path of pages for page search

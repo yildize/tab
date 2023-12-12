@@ -7,9 +7,9 @@ import os
 class DummyQACleaner:
     """ This class is the most basic ruled based cleaner for the derived qa pairs. I am planning to provide
     a more capable cleaner or maybe a correcter utilizing an LLM. That is why I call this class as dummy."""
-    def __init__(self, file_path:str, banned_phrases=("this document",)):
+    def __init__(self, file_path:str, banned_phrases=("this document", "this page")):
         self._file_path = file_path
-        with open(file_path, 'r') as json_file:
+        with open(file_path, 'r', encoding="utf-8") as json_file:
             self._qa_list: List[Dict[str, Any]] = json.load(json_file)
         self._banned_phrases = banned_phrases
 
@@ -60,7 +60,7 @@ class DummyQACleaner:
         file_path_without_extension = os.path.splitext(self._file_path)[0]
         clean_file_path = file_path_without_extension+"_cleaned.json"
         # Open the output file in write mode
-        with open(clean_file_path, 'w') as json_file:
+        with open(clean_file_path, 'w', encoding="utf-8") as json_file:
             # Write the list of dictionaries as JSON to the file
-            json.dump(cleaned_qas, json_file, indent=4)  # Use indent for pretty formatting
+            json.dump(cleaned_qas, json_file, indent=4, ensure_ascii=False)  # Use indent for pretty formatting
         print(f"Cleaned qas saved as {clean_file_path}")

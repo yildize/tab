@@ -46,7 +46,7 @@ def save_docs(docs, docs_path: str):
 def load_qa_pairs_json_as_docs(qa_pairs_json_path: str) -> List[Doc]:
     """ This function is used to load question-answer pair json file as a List[Doc] by embedding answer into metadata."""
     if not os.path.isabs(qa_pairs_json_path): qa_pairs_json_path = os.path.join(ROOT_PATH, qa_pairs_json_path)
-    with open(qa_pairs_json_path, 'r') as json_file:
+    with open(qa_pairs_json_path, 'r', encoding="utf-8") as json_file:
         qa_list: List[Dict[str, Any]] = json.load(json_file)
     docs = []
     for qa_dict in qa_list:

@@ -36,7 +36,7 @@ if __name__ == '__main__':
     # To run from terminal, position to the project root and then: python -m rest_apis.knowledge_base.app -- args
     args = parser.parse_args()
 
-    args.llm_endpoint_url = "http://7305-34-143-246-242.ngrok-free.app/ask"
+    args.llm_endpoint_url = "http://c6e0-35-199-184-254.ngrok-free.app/ask"
     args.base_kb_endpoint_url = "127.0.0.1:5001"
 
     rag = RAGAdvanced(llm=ProxyMistralLLM(endpoint_url=args.llm_endpoint_url), kb=ProxyKnowledgeBase(base_endpoint_url=args.base_kb_endpoint_url), search_pages=args.rag_type=="search_pages")

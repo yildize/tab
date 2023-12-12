@@ -47,5 +47,5 @@ class QASConverter:
 
 
 if __name__ == "__main__":
-    qasc = QASConverter(input_file_path="./storage/extracted_questions/qas_index_425_to_550_2023-12-02_16-18-19.json")
+    qasc = QASConverter(input_file_path="./storage/extracted_questions/uni-advanced_qas/advanced_qas.json")
     qasc.convert()
