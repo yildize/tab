@@ -3,10 +3,10 @@ from rag.rag import DefaultRetrievalAugmentedGenerator
 from splitters.pdf_splitter import PdfSplitter
 import time
 
-pdf_splitter = PdfSplitter(chunk_size=1000, chunk_overlap=0, local_src_path="./storage/sources/uni-alt")
+pdf_splitter = PdfSplitter(chunk_size=1000, chunk_overlap=0, local_src_path="./storage/sources/uni-ntn")
 splits = pdf_splitter.split()
 
-test_rag = DefaultRetrievalAugmentedGenerator(docs=splits, llm=ProxyMistralLLM(endpoint_url="http://3fe1-35-196-54-177.ngrok-free.app/ask"))
+test_rag = DefaultRetrievalAugmentedGenerator(docs=splits, llm=ProxyMistralLLM(endpoint_url="http://e0de-35-231-217-74.ngrok-free.app/ask"))
 from evaluation.evaluation_set import EvaluationSet
 from evaluation.bleu_evaluator import BleuEvaluator
 from evaluation.semantic_evaluator import SemanticEvaluator
@@ -15,7 +15,6 @@ from evaluation.semantic_evaluator import SemanticEvaluator
 evaluation_set = EvaluationSet()
 
 from ctransformers import AutoModelForCausalLM
-AutoModelForCausalLM
 
 answers = []
 answer_times = []
@@ -25,7 +24,7 @@ for qa in evaluation_set.qas:
     answer = test_rag.ask(question=qa.q)
     answers.append(answer)
     et = time.time()
-    #print(f"RAG Answer: '{answer}'")
+    print(f"RAG Answer: '{answer}'")
     answer_time = et-st
     answer_times.append(answer_time)
     print(f"-------- {answer_time:.2f} seconds ----------")

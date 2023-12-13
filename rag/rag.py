@@ -11,7 +11,7 @@ class DefaultRetrievalAugmentedGenerator:
     def __init__(self, docs:List[Doc], llm=None):
         self._docs = docs
         self._llm = MistralLLM(mistral_type=MistralTypes.GPTQ_4bit) if llm is None else llm
-        self._kb = DefaultKnowledgeBase(docs=docs, embedder_name="all-mpnet-base-v2")
+        self._kb = DefaultKnowledgeBase(docs=docs, embedder_name="msmarco-MiniLM-L-6-v3")#embedder_name="all-mpnet-base-v2")
 
     def ask(self, question:str):
         related_docs = self._kb.search(q=question, k=5)
@@ -27,11 +27,16 @@ class DefaultRetrievalAugmentedGenerator:
             source = doc.metadata["source"]
             content = doc.page_content
             #retrieved_content += f"Source{i}:{os.path.basename(source)}\nContent{i}:{content}\n\n-----------\n" # f"Content{i}:{content}\n-----------\n" #
-            retrieved_content +=  f"{i+1}. {content}\n"
+            #retrieved_content +=  f"{i+1}. {content}\n"
+            retrieved_content += f"--- Content {i + 1} ---\n\n{content}\n\n"
         context = MistralContext()
 
-        context.add_user_message(entry=f""""Question: [{question}]\n\n Content Sources:\n[{retrieved_content}]\n\n. Please give a clear and concise answer to the question using the above content sources.
-PAY ATTENTION: If answer is not found on the Content Sources, ONLY ANSWER: 'Sorry, I don't know the answer.' """)
+#         context.add_user_message(entry=f""""Question: [{question}]\n\n Content Sources:\n[{retrieved_content}]\n\n. Please give a clear and concise answer to the question using the above content sources.
+# PAY ATTENTION: If answer is not found on the Content Sources, ONLY ANSWER: 'Sorry, I don't know the answer.' """)
+
+        context.add_user_message(entry=f"{question}\n\n"
+                                   f"Carefully read the following contents, and give a clear and concise answer the above question accordingly. Answer can be found inside a single content or might require a synthesis of multiple contents. Here are the contents:\n\n{retrieved_content}")
+
 
         # context.add_user_message(
         #     entry=f"Assume, your name is TAB, you are an helpful and kind Information Management Assistant for Hacettepe University Computer Engineering Department."

@@ -1,3 +1,4 @@
+import os
 from proxies.proxy_kb import ProxyKnowledgeBase
 from proxies.proxy_mistral_llm import ProxyMistralLLM
 from proxies.proxy_rag import ProxyRAG
@@ -12,7 +13,7 @@ import time
 # kb = ProxyKnowledgeBase(base_endpoint_url="127.0.0.1:5000")
 # test_rag = RAGAdvanced(llm=llm, kb=kb)
 
-test_rag = ProxyRAG(endpoint_url="127.0.0.1:5001/ask")
+test_rag = ProxyRAG(endpoint_url="127.0.0.1:5005/ask")
 #answer, metadata = rag.ask(question="Give me a full list of Research Assistant names for Hacettepe University CS department.", k=7, cross_encoder_input_k=50)
 
 from evaluation.evaluation_set import EvaluationSet
@@ -23,15 +24,24 @@ from evaluation.semantic_evaluator import SemanticEvaluator
 evaluation_set = EvaluationSet()
 
 from ctransformers import AutoModelForCausalLM
-AutoModelForCausalLM
 
 answers = []
 answer_times = []
 for qa in evaluation_set.qas:
-    print(f"Question to be asked: '{qa.q}' ")
+    print(f"Question: '{qa.q}' ")
     st = time.time()
     answer, metadata = test_rag.ask(question=qa.q, k=5, cross_encoder_input_k=100)
+
+    # Extract base names and pages, and combine them into a single string
+    combined_source = ', '.join(
+        f"{os.path.basename(d['source'])} [page {d['page']}]"
+        for d in metadata
+    )
+    # Create the final dictionary
+    metadata = {"source": combined_source, "page": -1}
+
     print("Anwer: ",answer)
+    print("Metadata:", metadata)
     answers.append(answer)
     et = time.time()
     #print(f"RAG Answer: '{answer}'")
